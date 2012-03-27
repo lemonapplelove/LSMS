@@ -1,0 +1,19 @@
+{% extends "base.html" %}     
+{% block title %}Student Manangement System - Class Manager{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Welcome, {{rname}} ({{uname}})! If you want to modify your password, please click here:<a href="/user/modpass">Modify my account</a></p>
+<p>Please select an action!</p>
+<a href="/list/sturoll">List students</a>
+<a href="/list/class">List classes</a>
+<a href="/list/stuperf">List performance</a>
+<a href="/list/stunoti">List notifications</a>
+<br />
+<a href="/new/sturoll">New student</a>
+<a href="/new/class">New class</a>
+<a href="/new/stuperf">Generate performance</a>
+<a href="/new/stunoti">New notification</a>
+<br />
+
+{% endblock %}  

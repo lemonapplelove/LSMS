@@ -1,0 +1,31 @@
+{% extends "base.html" %}     
+{% block title %}List Performance{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>
+Class Name:{{clname}}<br />
+Course Name:{{crname}}<br />
+Teacher Name:{{tname}}<br />
+Exam Weight:{{ew}}%<br />
+<a href="/new/stuscore?crid={{crid}}&clid={{clid}}">Grade</a>
+</p>
+<table>
+<tr>
+	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=stuId">Student Number</a></td>
+	<td>Student Name</td>
+	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-examScore">Exam Score</a></td>
+	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-nonExamScore">Non-exam Score</a></td>
+	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-finalScore">Final Score</a></td></tr>
+{% for rec in slist %}
+<tr>
+	<td>{{rec.sid}}</td>
+	<td>{{rec.sname}}</td>
+	<td>{% ifequal rec.escore -1 %}{% else %}{{rec.escore}}{% endifequal%}</td>
+	<td>{% ifequal rec.nscore -1 %}{% else %}{{rec.nscore}}{% endifequal%}</td>
+	<td>{% ifequal rec.fscore -1 %}{% else %}{{rec.fscore}}{% endifequal%}</td>
+</tr>
+{% endfor %}
+</table>
+ 
+{% endblock %}  

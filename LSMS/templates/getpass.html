@@ -1,0 +1,11 @@
+{% extends "base.html" %}     
+{% block title %}Register{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please enter your email!</p>
+<form name="fgetpass" action="/user/getpass/" method="post" id="fgetpass">
+E-mail:<input type="email" size=25 name="email" />
+<input type="submit" value="Send reset link" />
+</form>  
+{% endblock %}  

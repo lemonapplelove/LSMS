@@ -1,1 +1,48 @@
-Modified
+BEGIN;
+CREATE TABLE "SM_account" (
+    "userId" integer NOT NULL PRIMARY KEY,
+    "userName" varchar(30) NOT NULL,
+    "userType" varchar(1) NOT NULL,
+    "email" varchar(75) NOT NULL,
+    "roleId" integer NOT NULL,
+    "regDate" date NOT NULL,
+    "isDisabled" bool NOT NULL
+)
+;
+CREATE TABLE "SM_student" (
+    "stuId" integer NOT NULL PRIMARY KEY,
+    "stuName" varchar(30) NOT NULL,
+    "stuBirth" date NOT NULL,
+    "stuGender" varchar(1) NOT NULL,
+    "stuNative" varchar(30) NOT NULL,
+    "classId" integer NOT NULL
+)
+;
+CREATE TABLE "SM_teacher" (
+    "teaId" integer NOT NULL PRIMARY KEY,
+    "teaName" varchar(30) NOT NULL
+)
+;
+CREATE TABLE "SM_cmanager" (
+    "cmId" integer NOT NULL PRIMARY KEY,
+    "cmName" varchar(30) NOT NULL
+)
+;
+CREATE TABLE "SM_cclass" (
+    "classId" integer NOT NULL PRIMARY KEY,
+    "className" varchar(50) NOT NULL,
+    "classGrade" integer NOT NULL,
+    "cmId" integer NOT NULL
+)
+;
+CREATE TABLE "SM_stuevent" (
+    "eventId" integer NOT NULL PRIMARY KEY,
+    "eventBody" varchar(200) NOT NULL,
+    "eventType" varchar(1) NOT NULL,
+    "point" real NOT NULL,
+    "stuId" integer NOT NULL,
+    "eventDate" date NOT NULL,
+    "expireDate" date NOT NULL
+)
+;
+COMMIT;

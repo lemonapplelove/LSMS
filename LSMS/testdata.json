@@ -1,0 +1,14 @@
+[
+    {
+        "model": "SM.account",
+        "pk": 0,
+        "fields": {
+            "userName": "admin",
+            "userPwd": "admin",
+            "userType": "M",
+            "email": "admin@admin.com",
+            "roleId": 0,
+            "regDate": "2011-08-10"
+        }
+    }
+]

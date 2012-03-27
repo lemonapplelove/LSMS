@@ -1,0 +1,44 @@
+{% extends "base.html" %}     
+{% block title %}List Performance{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>
+<form name="flistperf" action="/list/stuperf/" method="get" id="flistperf">
+Please select a class:<select name="cid">
+<option value=""></option>
+{% for c in cl %}
+<option value="{{c.cid}}" {% ifequal c.cid cid%}selected="selected"{% endifequal %}>{{c.cname}}</option>
+{% endfor %}
+</select>
+Term:
+<select name="term" >
+<option value=1 {% ifequal term 1 %}selected="selected"{% endifequal %}>第1学期</option>
+<option value=2 {% ifequal term 2 %}selected="selected"{% endifequal %}>第2学期</option>
+<option value=3 {% ifequal term 3 %}selected="selected"{% endifequal %}>第3学期</option>
+<option value=4 {% ifequal term 4 %}selected="selected"{% endifequal %}>第4学期</option>
+<option value=5 {% ifequal term 5 %}selected="selected"{% endifequal %}>第5学期</option>
+<option value=6 {% ifequal term 6 %}selected="selected"{% endifequal %}>第6学期</option>
+<option value=7 {% ifequal term 7 %}selected="selected"{% endifequal %}>第7学期</option>
+<option value=8 {% ifequal term 8 %}selected="selected"{% endifequal %}>第8学期</option>
+</select>
+<input type="submit" value="Query" />
+</form>
+</p>
+{% if spl %}
+<table>
+<tr>
+<td><a href="?cid={{cid}}&term={{term}}&orderby=stuId">Student Number</a></td>
+<td>Name</td>
+<td><a href="?cid={{cid}}&term={{term}}&orderby=ACA">Academic Score</a></td>
+<td><a href="?cid={{cid}}&term={{term}}&orderby=MOR">Moral Score</a></td>
+<td><a href="?cid={{cid}}&term={{term}}&orderby=AWA">Award Score</a></td>
+<td><a href="?cid={{cid}}&term={{term}}&orderby=FIN">Final Score</a></td>
+</tr>
+{% for sp in spl %}
+<tr><td>{{sp.s.stuId}}</td><td>{{sp.s.stuName}}</td><td>{{sp.p.acaScore}}</td><td>{{sp.p.moralScore}}</td><td>{{sp.p.awardScore}}</td><td>{{sp.p.finalScore}}</td></tr>
+{% endfor %}
+</table>
+{% endif %}
+ 
+{% endblock %}  

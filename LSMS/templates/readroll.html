@@ -1,0 +1,47 @@
+{% extends "base.html" %}     
+{% block title %}Student Roll--{{stuInfo.stuName}}{% endblock %}
+{% block script %}
+function delconfirm()
+{
+	return confirm("Are you sure to delete this event? This process cannot be undone.")
+}
+{% endblock %}     
+{% block content %}   
+<p>Student Roll Information:</p>
+<table>
+<tr><td>Student Number:</td><td>{{stuInfo.stuId}}</td> <td>Student Name:</td><td>{{stuInfo.stuName}}</td></tr>
+<tr><td>Student Gender:</td><td>{{stuInfo.stuGender}}</td> <td>Student Birth:</td><td>{{stuInfo.stuBirth}}</td></tr>
+<tr><td>Student Native:</td><td>{{stuInfo.stuNative}}</td> <td>Student Class:</td><td>{{stuInfo.classId}}</td></tr>
+</table>
+{% ifequal utype 'M' %} <a href="/new/stuevent?sid={{stuInfo.stuId}}">Add an event to {{stuInfo.stuName}}</a>{% endifequal %}
+<hr>
+Records:
+<table>
+<tr><td>Event</td><td>Event Date</td><td>Effective Term</td><td>Point</td>{% ifequal utype 'M' %}<td>Operations</td>{% endifequal %}</tr>
+{% for rec in records %}
+<tr><td>{{rec.eventBody}}</td><td>{{rec.eventDate}}</td><td>{{rec.effectTerm}}</td><td>{{rec.point}}</td>{% ifequal utype 'M' %}<td><a href="/del/stuevent?eid={{rec.eventId}}" onclick="javascript:return delconfirm();">Delete</a></td>{% endifequal %}</tr>
+{% endfor %}
+</table><hr>
+Awards:
+<table>
+<tr><td>Event</td><td>Event Date</td><td>Effective Term</td><td>Point</td>{% ifequal utype 'M' %}<td>Operations</td>{% endifequal %}</tr>
+{% for rec in awards %}
+<tr><td>{{rec.eventBody}}</td><td>{{rec.eventDate}}</td><td>{{rec.effectTerm}}</td><td>{{rec.point}}</td>{% ifequal utype 'M' %}<td><a href="/del/stuevent?eid={{rec.eventId}}" onclick="javascript:return delconfirm();">Delete</a></td>{% endifequal %}</tr>
+{% endfor %}
+</table><hr>
+Punishments:
+<table>
+<tr><td>Event</td><td>Event Date</td><td>Effective Term</td><td>Point</td>{% ifequal utype 'M' %}<td>Operations</td>{% endifequal %}</tr>
+{% for rec in punishments %}
+<tr><td>{{rec.eventBody}}</td><td>{{rec.eventDate}}</td><td>{{rec.effectTerm}}</td><td>{{rec.point}}</td>{% ifequal utype 'M' %}<td><a href="/del/stuevent?eid={{rec.eventId}}" onclick="javascript:return delconfirm();">Delete</a></td>{% endifequal %}</tr>
+{% endfor %}
+</table><hr>
+<table>
+Performance:
+<tr><td>Term</td><td>Academic Score</td><td>Moral Score</td><td>Award Score</td><td>Final Score</td></tr>
+{% for rec in pl %}
+<tr><td>{{rec.term}}</td><td>{{rec.acaScore}}</td><td>{{rec.moralScore}}</td><td>{{rec.awardScore}}</td><td>{{rec.finalScore}}</td></tr>
+{% endfor %}
+</table>
+
+{% endblock %}  

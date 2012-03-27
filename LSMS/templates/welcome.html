@@ -1,0 +1,13 @@
+{% extends "root.html" %}     
+{% block title %}Welcome to LSMS{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please log on first!</p>
+<form name="fLogon" action="/user/authorize/" method="post" id="fLogon">
+Username:<input type="text" size=25 name="username" />
+Password:<input type="password" size=25 name="password" />
+<input type="submit" value="Logon" />
+<a href="user/getpass/">Forgot my password</a> <a href="user/register/">Get an account</a>
+</form>  
+{% endblock %}  

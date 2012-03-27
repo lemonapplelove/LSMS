@@ -1,0 +1,39 @@
+{% extends "base.html" %}     
+{% block title %}List Notification{% endblock %}
+{% block script %}
+function delconfirm()
+{
+	return confirm("Are you sure to delete this notification? This process cannot be undone.")
+}
+{% endblock %}     
+{% block content %}   
+<p>
+{% if cl %}
+<form name="flistnoti" action="/list/stunoti/" method="get">
+Please select a class:<select name="cid">
+<option value=""></option>
+{% for c in cl %}
+<option value="{{c.cid}}" {% ifequal c.cid cid%}selected="selected"{% endifequal %}>{{c.cname}}</option>
+{% endfor %}
+</select>
+Scope:<select name="nscope">
+<option value="all" {% ifequal ns 'all'%}selected="selected"{% endifequal %}>ALL</option>
+<option value="effective" {% ifequal ns 'effective'%}selected="selected"{% endifequal %}>EFFECTIVE</option>
+<option value="history" {% ifequal ns 'history'%}selected="selected"{% endifequal %}>HISTORY</option>
+</select>
+<input type="submit" value="Query" />
+</form>
+{% else %}
+Notification Scope:<a href="?nscope=all">ALL</a>|<a href="?nscope=effective">EFFECTIVE</a>|<a href="?nscope=history">HISTORY</a>
+{% endif %}
+</p>
+{% if nl %}
+<table>
+<tr><td>Notification Title</td><td>Notification Date</td><td>Expire Date</td>{% if cl %}<td>Operations</td>{% endif %}</tr>
+{% for n in nl %}
+<tr><td><a href="/read/stunoti?nid={{n.id}}">{{n.notiTitle}}</a></td><td>{{n.notiDate}}</td><td>{{n.expireDate}}</td>{% if cl %}<td><a href="/del/stunoti?nid={{n.id}}" onclick="javascript:return delconfirm();">Delete</a></td>{% endif %}</tr>
+{% endfor %}
+</table>
+{% endif %}
+ 
+{% endblock %}  

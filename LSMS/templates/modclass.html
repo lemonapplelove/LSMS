@@ -1,0 +1,19 @@
+{% extends "base.html" %}     
+{% block title %}New Student{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Modify Class:</p>
+<form name="fNewclass" action="/mod/class/" method="post">
+Class Id:<input type="text" size=25 name="cid" value="{{c.classId}}" readonly="true"/><br />
+Class Name:<input type="text" size=25 name="cname" value="{{c.className}}" /><br />
+Class Grade:<input type="text" size=25 name="grade" value="{{c.classGrade}}"/><br />
+Class Manager:
+<select name="cmid">
+{% for i in cm %}
+<option value="{{i.cmId}}" {% ifequal i.cmId c.cmId%}selected="selected"{% endifequal %}>{{i.cmName}}</option>
+{% endfor %}
+</select><br />
+<input type="submit" value="Submit" />
+</form>  
+{% endblock %}  

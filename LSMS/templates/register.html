@@ -1,0 +1,27 @@
+{% extends "base.html" %}     
+{% block title %}Register{% endblock %}
+{% block style %}
+td { text-align:right}
+{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please fill in the form!</p>
+<form name="fRes" action="/user/register/" method="post" id="fRes">
+<table>
+<tr><td>
+<select name="utype">
+	<option value="S">Student No.</option>
+	<option value="T">Teacher No.</option>
+	<option value="M">Class Manager No.</option>
+</select></td>
+<td><input type="text" size=25 name="internalid" /></td></tr>
+<tr><td>Username:</td><td><input type="text" size=25 name="username" /></td></tr>
+<tr><td>Password:</td><td><input type="password" size=25 name="password" /></td></tr>
+<tr><td>Confirm Password:</td><td><input type="password" size=25 name="cpassword" /></td></tr>
+<tr><td>E-mail:</td><td><input type="email" size=25 name="email" /></td></tr>
+</table>
+<input type="submit" value="Submit" />
+</form>
+  
+{% endblock %}  

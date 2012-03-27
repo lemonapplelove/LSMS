@@ -1,0 +1,11 @@
+{% extends "base.html" %}     
+{% block title %}Message{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>
+	{% ifequal mtype 'error' %} An error has occurred!{% endifequal %}
+	{% ifequal mtype 'info' %} Infomation:{% endifequal %}
+</p>
+{{mbody}}
+{% endblock %}  

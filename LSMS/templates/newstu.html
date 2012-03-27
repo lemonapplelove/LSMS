@@ -1,0 +1,20 @@
+{% extends "base.html" %}     
+{% block title %}New Student{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please fill in the form!</p>
+<form name="fNewstu" action="/new/sturoll/" method="post" id="fNewstu">
+Student Name:<input type="text" size=25 name="sname" /><br />
+Student Birth:<input type="text" size=25 name="sbirth" /><br />
+Student Gender:<select name="sgender"><option value="M">Male</option><option value="F">Female</option></select><br />
+Student Native:<input type="text" size=25 name="snative" /><br />
+Student Class:
+<select name="sclass" >
+{% for c in cl %}
+<option value='{{c.cid}}'>{{c.cname}}</option>
+{% endfor %}
+</select><br />
+<input type="submit" value="Submit" />
+</form>  
+{% endblock %}  

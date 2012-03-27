@@ -1,0 +1,27 @@
+{% extends "base.html" %}     
+{% block title %}Manage Student Roll{% endblock %}
+{% block script %}
+function delconfirm()
+{
+	return confirm("Are you sure to delete this student and all his events/scores/performances? This process cannot be undone.")
+}
+{% endblock %}  
+{% block content %}   
+<p>Manage Student Roll</p>
+<form name="cclass" action="/list/sturoll" method="get">
+Please select a class:<select name="cid">
+<option value=""></option>
+{% for c in cl %}
+<option value="{{c.cid}}" {% ifequal c.cid cid%}selected="selected"{% endifequal %}>{{c.cname}}</option>
+{% endfor %}
+</select>
+<input type="submit" value="Query" />
+</form>
+<table>
+<tr><td>Student Number</td><td>Name</td><td>Gender<td>Birth</td><td>Native</td><td>Operations</td></tr>
+{% for s in sl %}
+<tr><td>{{s.stuId}}</td><td>{{s.stuName}}</td><td>{{s.stuGender}}<td>{{s.stuBirth}}</td><td>{{s.stuNative}}</td><td><a href="/read/sturoll?stuId={{s.stuId}}">Read Details</a>|<a href="/mod/sturoll?sid={{s.stuId}}">Modify</a>|<a href="/del/sturoll?sid={{s.stuId}}" onclick="javascript:return delconfirm();">Delete</a></td></tr>
+{% endfor %}
+</table>
+{{mbody}}
+{% endblock %}  

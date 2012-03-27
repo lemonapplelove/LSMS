@@ -1,0 +1,13 @@
+{% extends "base.html" %}     
+{% block title %}Student Manangement System - Student{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Welcome, {{rname}} ({{uname}})! If you want to modify your password, please click here:<a href="/user/modpass">Modify my account</a></p>
+<p>Please select an action!</p>
+<a href="/read/sturoll">Query my student roll</a>
+<a href="/read/stuscore">Query my scores</a>
+<a href="/list/stunoti">Query my notifications</a>
+<br />
+
+{% endblock %}  

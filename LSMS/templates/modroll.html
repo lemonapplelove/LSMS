@@ -1,0 +1,23 @@
+{% extends "base.html" %}     
+{% block title %}Modify Student{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please fill in the form!</p>
+<form name="fmodstu" action="/mod/sturoll/" method="post" id="fmodstu">
+Student ID:<input type="text" size=25 name="sid" value="{{stuInfo.stuId}}" readonly="true"/><br />
+Student Name:<input type="text" size=25 name="sname" value="{{stuInfo.stuName}}"/><br />
+Student Birth:<input type="text" size=25 name="sbirth" value="{{stuInfo.stuBirth|date:"Y-m-d"}}"/><br />
+Student Gender:<select name="sgender">
+<option value="M" {% ifequal stuInfo.stuGender 'M'%}selected="selected"{% endifequal %}>Male</option>
+<option value="F" {% ifequal stuInfo.stuGender 'F'%}selected="selected"{% endifequal %}>Female</option></select><br />
+Student Native:<input type="text" size=25 name="snative" value="{{stuInfo.stuNative}}"/><br />
+Student Class:
+<select name="sclass" >
+{% for c in cl %}
+<option value='{{c.cid}}' {% ifequal c.cid stuInfo.classId%}selected="selected"{% endifequal %}>{{c.cname}}</option>
+{% endfor %}
+</select><br />
+<input type="submit" value="Submit" />
+</form>  
+{% endblock %}  

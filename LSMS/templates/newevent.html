@@ -1,0 +1,27 @@
+{% extends "base.html" %}     
+{% block title %}New Event{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please fill in the form!</p>
+<form name="fNewevnet" action="/new/stuevent/" method="post" id="fNewevent">
+Student Name:{{sname}}<br />
+<input type="hidden" name="sid" value="{{sid}}" />
+Event Description:<input type="text" size=25 name="ebody" /><br />
+Event Type:<select name="etype"><option value="R">Record</option><option value="A">Award</option><option value="P">Punishment</option></select><br />
+Event Point:<input type="text" size=25 name="epoint" value=0 /><br />
+Event Date:<input type="text" size=25 name="edate" /><br />
+Event Term:
+<select name="eterm" >
+<option value=1>第1学期</option>
+<option value=2>第2学期</option>
+<option value=3>第3学期</option>
+<option value=4>第4学期</option>
+<option value=5>第5学期</option>
+<option value=6>第6学期</option>
+<option value=7>第7学期</option>
+<option value=8>第8学期</option>
+</select><br />
+<input type="submit" value="Submit" />
+</form>  
+{% endblock %}  
