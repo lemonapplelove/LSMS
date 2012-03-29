@@ -17,6 +17,9 @@ class account(models.Model):
     regDate=models.DateField()
     isDisabled=models.BooleanField(default=False)
     
+    def __unicode__(self):
+        return self.userName
+    
     
 class student(models.Model):
     GENDER=(
