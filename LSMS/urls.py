@@ -7,16 +7,13 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'LSMS.views.home', name='home'),
-    url(r'^stuhome', 'LSMS.views.stuHome'),
-    url(r'^teahome', 'LSMS.views.teaHome'),
-    url(r'^cmhome', 'LSMS.views.cmHome'),
+    url(r'^home/', 'LSMS.views.home'),
     
-    url(r'^user/register', 'LSMS.views.register'),
-    url(r'^user/authorize', 'LSMS.views.authorize'),
-    url(r'^user/modpass', 'LSMS.views.modPass'),
-    url(r'user/disable', 'LSMS.views.disableUser'),
-    url(r'user/getpass', 'LSMS.views.getPass'),
-    url(r'user/logout', 'LSMS.views.logout'),
+    url(r'^accounts/login', 'LSMS.views.login'),
+    url(r'^accounts/register', 'LSMS.views.register'),
+    url(r'^accounts/modpass', 'LSMS.views.modPass'),
+    url(r'accounts/getpass', 'LSMS.views.getPass'),
+    url(r'accounts/logout', 'LSMS.views.logout'),
     
     url(r'^read/sturoll', 'LSMS.views.readStuRoll'),
     url(r'^read/stuscore', 'LSMS.views.readStuScore'),

@@ -1,102 +1,103 @@
 from django.db import models
-
+from django.contrib.auth.models import User
+from django.db.models import Avg,Sum
+from django.utils import crypto
+import datetime
+from LSMS.SM.msg import msg
 # Create your models here.
 
-class account(models.Model):
-    userTypeCh=(
-                ('S', 'student'),
-                ('T', 'teacher'),
-                ('M', 'class manager')
+class Profile(models.Model):
+    USER_TYPE=(
+                ('S', 'Student'),
+                ('T', 'Teacher'),
+                ('M', 'Class Manager')
     )
-    userId=models.AutoField(primary_key=True)
-    userName=models.CharField(max_length=30)
-    userPwd=models.CharField(max_length=128)
-    userType=models.CharField(max_length=1, choices=userTypeCh)
-    email=models.EmailField()
-    roleId=models.IntegerField()
-    regDate=models.DateField()
-    isDisabled=models.BooleanField(default=False)
+    user_type=models.CharField(max_length=1, choices=USER_TYPE)
+    user = models.ForeignKey(User, unique=True)
     
     def __unicode__(self):
-        return self.userName
+        return self.user_type
+
+class Teacher(models.Model):
+    #TeacherId=models.AutoField(primary_key=True)
+    teacher_name=models.CharField(max_length=30)
+    user = models.ForeignKey(User, unique=True, null=True)
+
+class ClassManager(models.Model):
+    #ClassManagerId=models.AutoField(primary_key=True)
+    classmanager_name=models.CharField(max_length=30)
+    user = models.ForeignKey(User, unique=True, null=True)
+
+class Class(models.Model):
+    #ClassId=models.AutoField(primary_key=True)
+    class_name=models.CharField(max_length=50)
+    grade=models.IntegerField()
+    class_manager=models.ForeignKey(ClassManager)
     
-    
-class student(models.Model):
+class Student(models.Model):
     GENDER=(
             ('M', 'Male'),
             ('F', 'Female')
     )
-    stuId=models.AutoField(primary_key=True)
-    stuName=models.CharField(max_length=30)
-    stuBirth=models.DateField()
-    stuGender=models.CharField(max_length=1, choices=GENDER)
-    stuNative=models.CharField(max_length=30)
-    classId=models.IntegerField()
+    #StudentId=models.AutoField(primary_key=True)
+    student_name=models.CharField(max_length=30)
+    birth=models.DateField()
+    gender=models.CharField(max_length=1, choices=GENDER)
+    native=models.CharField(max_length=30)
+    class_obj=models.ForeignKey(Class)
+    user = models.ForeignKey(User, unique=True, null=True)
 
-class teacher(models.Model):
-    teaId=models.AutoField(primary_key=True)
-    teaName=models.CharField(max_length=30)
-
-class cmanager(models.Model):
-    cmId=models.AutoField(primary_key=True)
-    cmName=models.CharField(max_length=30)
-
-class cclass(models.Model):
-    classId=models.AutoField(primary_key=True)
-    className=models.CharField(max_length=50)
-    classGrade=models.IntegerField()
-    cmId=models.IntegerField()
-
-class stuEvent(models.Model):
-    ETYPE=(
-           ('A', 'award'),
-           ('P', 'punish'),
-           ('R', 'record')
+class StudentEvent(models.Model):
+    EVENT_TYPE=(
+           ('A', 'Award'),
+           ('P', 'Punishment'),
+           ('R', 'Record')
     )
-    eventId=models.AutoField(primary_key=True)
-    eventBody=models.CharField(max_length=200)
-    eventType=models.CharField(max_length=1, choices=ETYPE)
+    #EventId=models.AutoField(primary_key=True)
+    event_body=models.CharField(max_length=200)
+    event_type=models.CharField(max_length=1, choices=EVENT_TYPE)
     point=models.FloatField(default=0)
-    stuId=models.IntegerField()
-    eventDate=models.DateField()
-    effectTerm=models.IntegerField()
+    student=models.ForeignKey(Student)
+    event_date=models.DateField()
+    effect_term=models.IntegerField()
 
-class course(models.Model):
-    CTYPE=(
-           ('M','mandatory'),
-           ('O','optional')
+class Course(models.Model):
+    COURSE_TYPE=(
+           ('M','Mandatory'),
+           ('O','Optional')
     )
-    courseId=models.AutoField(primary_key=True)
-    courseTitle=models.CharField(max_length=50)
-    courseCredit=models.IntegerField()
-    courseType=models.CharField(max_length=1, choices=CTYPE)
-    teaId=models.IntegerField()
-    examWeight=models.IntegerField()
+    #CourseId=models.AutoField(primary_key=True)
+    course_title=models.CharField(max_length=50)
+    credit=models.IntegerField()
+    course_type=models.CharField(max_length=1, choices=COURSE_TYPE)
+    teacher=models.ForeignKey(Teacher)
+    exam_weight=models.IntegerField()
     
-class courseOnStu(models.Model):
-    courseId=models.IntegerField()
-    stuId=models.IntegerField()
+    
+class CourseOnStu(models.Model):
+    course=models.ForeignKey(Course)
+    student=models.ForeignKey(Student)
     term=models.IntegerField()
-    examScore=models.IntegerField()
-    nonExamScore=models.IntegerField()
-    finalScore=models.IntegerField()
+    exam_score=models.IntegerField()
+    non_exam_score=models.IntegerField()
+    final_score=models.IntegerField()
     
-class performance(models.Model):
-    acaScore=models.FloatField()
-    moralScore=models.FloatField()
-    awardScore=models.FloatField()
-    finalScore=models.FloatField()
-    amRadio=models.IntegerField()
+class Performance(models.Model):
+    academic_score=models.IntegerField()
+    moral_score=models.IntegerField()
+    award_score=models.IntegerField()
+    final_score=models.IntegerField()
+    aca_mor_ratio=models.IntegerField()
     term=models.IntegerField()
-    genDate=models.DateField()
-    stuId=models.IntegerField()
+    generated_date=models.DateField()
+    student=models.ForeignKey(Student)
     
-class notification(models.Model):
-    classId=models.IntegerField()
-    notiTitle=models.CharField(max_length=200)
-    notiBody=models.CharField(max_length=1000)
-    notiDate=models.DateField()
-    expireDate=models.DateField()
+class Notification(models.Model):
+    class_obj=models.ForeignKey(Class)
+    notification_title=models.CharField(max_length=200)
+    notification_body=models.CharField(max_length=1000)
+    release_date=models.DateField()
+    expire_date=models.DateField()
     
     
     

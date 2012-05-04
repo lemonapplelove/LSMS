@@ -1,0 +1,11 @@
+class msg():
+    err_pwd_too_short='Password must have 6 or more characters!'
+    err_pwd_inconsist='The passwords you entered twice are different!'
+    err_usr_wrong_type='Your user type is invalid!'
+    err_usr_null_inner_id='Please enter a Student/Teacher/Class Manager Id!'
+    err_usr_null_uname='Username cannot be empty!'
+    err_usr_rep_uname='The username has been used by others!'
+    err_usr_rep_email='The email address is already used by other user!'
+    err_stu_wrong_id='Invalid student number!'
+    err_tea_wrong_id='Invalid teacher number!'
+    err_cm_wrong_id='Invalid class manager number!'

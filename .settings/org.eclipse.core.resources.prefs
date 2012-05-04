@@ -1,5 +1,5 @@
 eclipse.preferences.version=1
-encoding//LSMS/templates/cmhome.html=UTF-8
+encoding//LSMS/templates/classmanager_home.html=UTF-8
 encoding//LSMS/templates/getpass.html=UTF-8
 encoding//LSMS/templates/grade.html=UTF-8
 encoding//LSMS/templates/listnoti.html=UTF-8
@@ -14,7 +14,8 @@ encoding//LSMS/templates/newstu.html=UTF-8
 encoding//LSMS/templates/readroll.html=UTF-8
 encoding//LSMS/templates/readscore.html=UTF-8
 encoding//LSMS/templates/register.html=UTF-8
-encoding//LSMS/templates/stuhome.html=UTF-8
-encoding//LSMS/templates/teahome.html=UTF-8
+encoding//LSMS/templates/student_home.html=UTF-8
+encoding//LSMS/templates/teacher_home.html=UTF-8
 encoding//LSMS/templates/welcome.html=UTF-8
+encoding//LSMS/views.py=utf-8
 encoding/<project>=UTF-8

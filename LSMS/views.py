@@ -1,119 +1,55 @@
-from django.http import HttpResponse,HttpResponseRedirect
+#coding: utf-8
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template import RequestContext
 from django.shortcuts import render_to_response
-from LSMS.SM.libs import *
+from django.contrib import auth
+from django.contrib.auth.decorators import login_required
+#from LSMS.SM.libs import *
 from LSMS.SM.models import *
 import datetime
+from LSMS.SM.forms import *
+from django.contrib.auth.forms import *
 
 def msg(request):
     return render_to_response('message.html',{'mbody':request.GET.get('mbody',''), 'mtype':request.GET.get('mtype','info')})
 
+@login_required
 def home(request):
-    if request.session.get('utype', False):
-        if(request.session['utype']=='S'):
-            return HttpResponseRedirect('/stuhome')
-        elif(request.session['utype']=='T'):
-            return HttpResponseRedirect('/teahome')
-        elif(request.session['utype']=='M'):
-            return HttpResponseRedirect('/cmhome')
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Unexpected error'))
+    homepage={'S':'student_home.html', 'T':'teacher_home.html', 'M':'classmanager_home.html'}
+    return render_to_response(homepage[str(request.user.get_profile())], None, context_instance=RequestContext(request))
+
+def login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            auth.login(request, form.get_user())
+            return HttpResponseRedirect(request.GET.get('next','/home'))
     else:
-        return render_to_response('welcome.html')
-def stuHome(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact your class manager.'))
-    elif uinfo['utype']!='S':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You are not a student. Please go back to the proper UI.'))
-    else:
-        return render_to_response('stuhome.html', request.session)
-def teaHome(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % 'error',('Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']!='T':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % 'error',('You are not a teacher. Please go back to the proper UI.'))
-    else:
-        return render_to_response('teahome.html', request.session)
-def cmHome(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']!='M':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You are not a class manager. Please go back to the proper UI.'))
-    else:
-        return render_to_response('cmhome.html', request.session)
+        if request.user.is_authenticated():
+            return HttpResponseRedirect(request.GET.get('next','/home'))
+        form=AuthenticationForm()
+    return render_to_response('login.html', {'form':form})
+
+def logout(request):
+    auth.logout(request)
+    return HttpResponseRedirect('/accounts/login')
 
 def register(request):
-    if len(request.POST)==0:
-        return render_to_response('register.html')
-    elif request.POST['password']!=request.POST['cpassword']:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Please confirm you enter the same password twice!'))
+    if request.method=='POST':
+        form=RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/accounts/login')
     else:
-        res=reg(request.POST['utype'],request.POST['username'],request.POST['password'],request.POST['email'],request.POST['internalid'])
-        if res=='OK':
-            return authorize(request)
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error',res))
-        
+        form=RegisterForm();
+    return render_to_response('register.html', {'form':form})
+
 def modPass(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    else:
-        if len(request.POST)==0:
-            return render_to_response('modpass.html')
-        elif request.POST['npassword']!=request.POST['cpassword']:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Please confirm you enter the same password twice!'))
-        elif len(request.POST['npassword'])<6:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Password must have 6 or more characters!'))
-        else:
-            r=account.objects.get(userId=uinfo['uid'])
-            r.userPwd=encrypt(uinfo['uname'],request.POST['npassword'])
-            r.save()
-            return HttpResponseRedirect('/')
+    pass
 def getPass(request):
-    return render_to_response('getpass.html')
+    pass
 def disableUser(requst):
     return HttpResponse('disable user')
-def logout(request):
-    request.session.flush()
-    return HttpResponseRedirect('/')
-def authorize(request):
-    uname=request.POST.get('username','')
-    upass=request.POST.get('password','')
-    auth_res=auth(uname,upass)
-    if auth_res['auth_state']=='failed':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your username or password is invalid!'))
-    elif auth_res['auth_state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    else:
-        request.session['uid']=auth_res['user_object'].userId
-        request.session['uname']=auth_res['user_object'].userName
-        request.session['email']=auth_res['user_object'].email
-        request.session['utype']=auth_res['user_object'].userType
-        request.session['rid']=auth_res['user_object'].roleId
-        request.session.set_expiry(0)
-        if(auth_res['user_object'].userType=='S'):
-            request.session['rname']=student.objects.get(stuId=request.session['rid']).stuName
-            #return HttpResponseRedirect('/stuhome')
-        elif(auth_res['user_object'].userType=='T'):
-            request.session['rname']=teacher.objects.get(teaId=request.session['rid']).teaName
-            #return HttpResponseRedirect('/teahome')
-        elif(auth_res['user_object'].userType=='M'):
-            request.session['rname']=cmanager.objects.get(cmId=request.session['rid']).cmName
-            #return HttpResponseRedirect('/cmhome')
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Unexpected error'))
-        return HttpResponseRedirect('/')
 
 def readStuRoll(request):
     uinfo=getuinfo(request)

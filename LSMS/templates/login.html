@@ -1,0 +1,12 @@
+{% extends "base.html" %}     
+{% block title %}Welcome to LSMS{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>Please log on first!</p>
+<form action="" method="post">
+<table>{{form.as_table}}</table>
+<input type="submit" value="Login" />
+<a href="/accounts/getpass/">Forgot my password</a> <a href="/accounts/register/">Get an account</a>
+</form>  
+{% endblock %}  

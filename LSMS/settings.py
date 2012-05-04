@@ -100,6 +100,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+)
+
 ROOT_URLCONF = 'LSMS.urls'
 
 TEMPLATE_DIRS = (
@@ -145,3 +152,8 @@ LOGGING = {
         },
     }
 }
+
+
+LOGIN_URL='/accounts/login'
+LOGOUT_URL='/accounts/logout'
+AUTH_PROFILE_MODULE='SM.Profile'
