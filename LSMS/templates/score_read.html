@@ -9,9 +9,27 @@ Term Filter::<a href='?term=-1'>[All Terms]::</a>|
 <a href='?term=1'>[Term 1]</a>| <a href='?term=2'>[Term 2]</a>| <a href='?term=3'>[Term 3]</a>| <a href='?term=4'>[Term 4]</a>|
 <a href='?term=5'>[Term 5]</a>| <a href='?term=6'>[Term 6]</a>| <a href='?term=7'>[Term 7]</a>| <a href='?term=8'>[Term 8]</a>
 <hr>
-<tr><td>Course Name</td><td>Teacher Name</td><td>Course Credit</td><td>Course Type</td><td>Term</td><td>Exam Score</td><td>Non-exam Score</td><td>Final Score</td></tr>
-{% for c in content.courses %}
-{{c.put_row}}
+<tr>
+	<th>Course Name</th>
+	<th>Teacher Name</th>
+	<th>Course Credit</th>
+	<th>Course Type</th>
+	<th>Term</th>
+	<th>Exam Score</th>
+	<th>Non-exam Score</th>
+	<th>Final Score</th>
+</tr>
+{% for rec in content %}
+<tr>
+	<td>{{rec.course}}</td>
+	<td>{{rec.course.teacher}}</td>
+	<td>{{rec.course.credit}}</td>
+	<td>{{rec.course.course_type}}</td>
+	<td>{{rec.term}}</td>
+	<td>{{rec.exam_score}}</td>
+	<td>{{rec.non_exam_score}}</td>
+	<td>{{rec.final_score}}</td>
+</tr>
 {% endfor %}
 </table>
 

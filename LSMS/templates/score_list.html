@@ -4,10 +4,10 @@
 {% endblock %}     
 {% block content %}   
 <p>
-Class Name:{{clname}}<br />
-Course Name:{{crname}}<br />
-Teacher Name:{{tname}}<br />
-Exam Weight:{{ew}}%<br />
+Class Name:{{extra.class_info}}<br />
+Course Name:{{extra.course_info}}<br />
+Teacher Name:{{extra.course_info.teacher}}<br />
+Exam Weight:{{extra.course_info.exam_weight}}%<br />
 <a href="/new/stuscore?crid={{crid}}&clid={{clid}}">Grade</a>
 </p>
 <table>
@@ -17,13 +17,13 @@ Exam Weight:{{ew}}%<br />
 	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-examScore">Exam Score</a></td>
 	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-nonExamScore">Non-exam Score</a></td>
 	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-finalScore">Final Score</a></td></tr>
-{% for rec in slist %}
+{% for rec in content %}
 <tr>
-	<td>{{rec.sid}}</td>
-	<td>{{rec.sname}}</td>
-	<td>{% ifequal rec.escore -1 %}{% else %}{{rec.escore}}{% endifequal%}</td>
-	<td>{% ifequal rec.nscore -1 %}{% else %}{{rec.nscore}}{% endifequal%}</td>
-	<td>{% ifequal rec.fscore -1 %}{% else %}{{rec.fscore}}{% endifequal%}</td>
+	<td>{{rec.student.id}}</td>
+	<td>{{rec.student}}</td>
+	<td>{{rec.exam_score}}</td>
+	<td>{{rec.non_exam_score}}</td>
+	<td>{{rec.final_score}}</td>
 </tr>
 {% endfor %}
 </table>

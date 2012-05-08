@@ -12,7 +12,7 @@ function delconfirm()
 <form name="flistnoti" action="/list/stunoti/" method="get">
 Please select a class:<select name="cid">
 <option value=""></option>
-{% for c in cl %}
+{% for rec in conten1 %}
 <option value="{{c.cid}}" {% ifequal c.cid cid%}selected="selected"{% endifequal %}>{{c.cname}}</option>
 {% endfor %}
 </select>
@@ -27,11 +27,11 @@ Scope:<select name="nscope">
 Notification Scope:<a href="?nscope=all">ALL</a>|<a href="?nscope=effective">EFFECTIVE</a>|<a href="?nscope=history">HISTORY</a>
 {% endif %}
 </p>
-{% if nl %}
+{% if content %}
 <table>
 <tr><td>Notification Title</td><td>Notification Date</td><td>Expire Date</td>{% if cl %}<td>Operations</td>{% endif %}</tr>
-{% for n in nl %}
-<tr><td><a href="/read/stunoti?nid={{n.id}}">{{n.notiTitle}}</a></td><td>{{n.notiDate}}</td><td>{{n.expireDate}}</td>{% if cl %}<td><a href="/del/stunoti?nid={{n.id}}" onclick="javascript:return delconfirm();">Delete</a></td>{% endif %}</tr>
+{% for rec in content %}
+<tr><td><a href="/read/stunoti?nid={{n.id}}">{{rec.notification_title}}</a></td><td>{{rec.release_date}}</td><td>{{rec.expire_date}}</td>{% if cl %}<td><a href="/del/stunoti?nid={{n.id}}" onclick="javascript:return delconfirm();">Delete</a></td>{% endif %}</tr>
 {% endfor %}
 </table>
 {% endif %}

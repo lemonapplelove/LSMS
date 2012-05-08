@@ -25,7 +25,7 @@ Term:
 <input type="submit" value="Query" />
 </form>
 </p>
-{% if spl %}
+{% if content %}
 <table>
 <tr>
 <td><a href="?cid={{cid}}&term={{term}}&orderby=stuId">Student Number</a></td>
@@ -35,8 +35,13 @@ Term:
 <td><a href="?cid={{cid}}&term={{term}}&orderby=AWA">Award Score</a></td>
 <td><a href="?cid={{cid}}&term={{term}}&orderby=FIN">Final Score</a></td>
 </tr>
-{% for sp in spl %}
-<tr><td>{{sp.s.stuId}}</td><td>{{sp.s.stuName}}</td><td>{{sp.p.acaScore}}</td><td>{{sp.p.moralScore}}</td><td>{{sp.p.awardScore}}</td><td>{{sp.p.finalScore}}</td></tr>
+{% for rec in content %}
+<tr><td>{{rec.student.id}}</td>
+<td>{{rec.student}}</td>
+<td>{{rec.academic_score}}</td>
+<td>{{rec.moral_score}}</td>
+<td>{{rec.award_score}}</td>
+<td>{{rec.final_score}}</td></tr>
 {% endfor %}
 </table>
 {% endif %}

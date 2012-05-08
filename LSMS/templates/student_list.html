@@ -19,8 +19,8 @@ Please select a class:<select name="cid">
 </form>
 <table>
 <tr><td>Student Number</td><td>Name</td><td>Gender<td>Birth</td><td>Native</td><td>Operations</td></tr>
-{% for s in sl %}
-<tr><td>{{s.stuId}}</td><td>{{s.stuName}}</td><td>{{s.stuGender}}<td>{{s.stuBirth}}</td><td>{{s.stuNative}}</td><td><a href="/read/sturoll?stuId={{s.stuId}}">Read Details</a>|<a href="/mod/sturoll?sid={{s.stuId}}">Modify</a>|<a href="/del/sturoll?sid={{s.stuId}}" onclick="javascript:return delconfirm();">Delete</a></td></tr>
+{% for rec in content %}
+<tr><td>{{rec.id}}</td><td>{{rec.name}}</td><td>{{rec.gender}}<td>{{rec.birth}}</td><td>{{rec.native}}</td><td><a href="/read/sturoll?stuId={{s.stuId}}">Read Details</a>|<a href="/mod/sturoll?sid={{s.stuId}}">Modify</a>|<a href="/del/sturoll?sid={{s.stuId}}" onclick="javascript:return delconfirm();">Delete</a></td></tr>
 {% endfor %}
 </table>
 {{mbody}}

@@ -1,5 +1,5 @@
 from django import forms
-from django.forms.formsets import formset_factory
+from django.forms.models import modelformset_factory, inlineformset_factory
 from django.contrib import auth
 from django.core.exceptions import ValidationError
 from LSMS.SM.models import *
@@ -88,6 +88,10 @@ class ClassForm(forms.ModelForm):
     class Meta:
         model = Class
     
+    def __init__(self, user=None, *args, **kwargs):
+        super(ClassForm, self).__init__(*args, **kwargs)
+        self.fields['class_manager'].initial=ClassManager.objects.get(user=user)
+    
     def clean(self):
         c=self.cleaned_data["class_name"]
         g=self.cleaned_data["grade"]
@@ -102,48 +106,41 @@ class StudentForm(forms.ModelForm):
         model = Student
         exclude = ('user',)
         
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, user=None, cid=None, *args, **kwargs):
         super(StudentForm, self).__init__(*args, **kwargs)
         self.fields['class_obj'].queryset=Class.objects.filter(class_manager__user=user)
+        self.fields['class_obj'].initial=cid
     
     
 class EventForm(forms.ModelForm):
     class Meta:
         model = StudentEvent
     
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, user=None, sid=None, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
-        self.fields['student'].queryset=Student.objects.filter(class_obj__class_manager__user=user)
+        self.fields['student'].queryset=Student.objects.filter(class_obj__class_manager__user=user, id=sid)
+        self.fields['student'].initial=sid
     
 class NotificationForm(forms.ModelForm):
     class Meta:
         model = Notification
         exclude = ('release_date',)
     
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, user=None, cid=None, *args, **kwargs):
         super(NotificationForm, self).__init__(*args, **kwargs)
         self.fields['notification_body'].widget=forms.Textarea()
         self.fields['class_obj'].queryset=Class.objects.filter(class_manager__user=user)
+        self.fields['class_obj'].initial=cid
 
 
-class GradeForm(forms.Form):
-    student_id=forms.CharField()
-    student_name=forms.CharField()
-    exam_score=forms.IntegerField()
-    nonexam_score=forms.IntegerField()
-    final_score=forms.IntegerField()
+class GradeForm(forms.ModelForm):
+    #student=forms.CharField(widget=forms.HiddenInput())
+#    student_display_name=forms.CharField()
+    class Meta:
+        model=CourseOnStudent
+        fields=['exam_score', 'non_exam_score']
+        widgets={
+            'student':forms.HiddenInput()
+        }
     
-    def __init__(self, *args, **kwargs):
-        super(GradeForm, self).__init__(*args, **kwargs)
-        self.fields['student_id'].widget.attrs['readonly'] = True
-        self.fields['student_name'].widget.attrs['disabled'] = True
-        self.fields['final_score'].widget.attrs['disabled'] = True
-
-    def clean_student_id(self):
-        return self.student_id
-    def clean_student_name(self):
-        return None
-    def clean_final_score(self):
-        return None
-    
-
+GradeFormSet = modelformset_factory(CourseOnStudent, form=GradeForm, extra=0)

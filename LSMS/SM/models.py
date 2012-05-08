@@ -90,6 +90,29 @@ class Student(models.Model):
         return self.courseonstudent_set.filter(**self.course_filter)
     def performances(self):
         return self.performance_set.all()
+    def generate_performance(self, term, amr):
+        aca=self.courseonstudent_set.filter(term=term, final_score__isnull=False).aggregate(Avg('final_score'))['final_score__avg']
+        mor=self.studentevent_set.filter(effect_term=term, event_type='R', point__lte=0).aggregate(Avg('point'))['point__avg']
+        awd=self.studentevent_set.filter(effect_term=term, event_type='A').aggregate(Sum('point'))['point__sum']
+        pns=self.studentevent_set.filter(effect_term=term, event_type='P').aggregate(Sum('point'))['point__sum']
+        if aca is None: aca=0
+        if mor is None: mor=0
+        if awd is None: awd=0
+        if pns is None: pns=0
+        fin=(aca*amr+mor*(100-amr))*1.0/100+awd-pns
+        try:
+            p=Performance.objects.get(student=self, term=term)
+        except Performance.DoesNotExist:
+            p=Performance()
+        p.student=self
+        p.academic_score=aca
+        p.moral_score=mor
+        p.award_score=awd-pns
+        p.aca_mor_ratio=amr
+        p.final_score=fin
+        p.term=term
+        p.generated_date=date.today()
+        p.save()
 
 
 class StudentEvent(models.Model):
@@ -136,7 +159,7 @@ class Course(models.Model):
     exam_weight=models.IntegerField()
     
     def __unicode__(self):
-        return '%s(%s)' % (self.course_title, self.teacher)
+        return self.course_title
     
     
 class CourseOnStudent(models.Model):

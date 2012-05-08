@@ -6,7 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'LSMS.views.home', name='home'),
+    url(r'^$', 'LSMS.views.home'),
     url(r'^home/', 'LSMS.views.home'),
     
     url(r'^accounts/login', 'LSMS.views.login'),
@@ -15,17 +15,34 @@ urlpatterns = patterns('',
     url(r'^accounts/resetPassword', 'LSMS.views.getPass'),
     url(r'^accounts/logout', 'LSMS.views.logout'),
     
-    url(r'^s/(\d+)/(roll|score)/', 'LSMS.views.student_query'),
-    url(r'^t/(\d+)/(course|score)/', 'LSMS.views.teacher_query'),
-    url(r'^cm/(\d+)/(roll|event|score|performance)/', 'LSMS.views.classmanager_query'),
+    url(r'^s/(\d+)/roll/', 'LSMS.views.student_read'),
+    url(r'^s/(\d+)/score/', 'LSMS.views.score_read'),
+    url(r'^s/(\d+)/event/add', 'LSMS.views.event_add'),
     
-    url(r'^roll/add/', 'LSMS.views.addfor', {'obj':'roll', 'perm':'classmanager'}),
+    url(r'^course/(\d+)/class/(\d+)/$', 'LSMS.views.score_list'),
+    url(r'^course/(\d+)/class/(\d+)/grade/$', 'LSMS.views.score_grade'),
+    
+    url(r'^class/$', 'LSMS.views.class_list'),
+    url(r'^class/add/$', 'LSMS.views.class_add'),
+    
+    url(r'^class/(\d+)/$', 'LSMS.views.student_list'),
+    url(r'^class/(\d+)/student/$', 'LSMS.views.student_list'),
+    url(r'^class/(\d+)/student/add$', 'LSMS.views.student_add'),
+    
+    url(r'^class/(\d+)/notification/$', 'LSMS.views.notification_list'),
+    url(r'^class/(\d+)/notification/add$', 'LSMS.views.notification_add'),
+    
+    url(r'^class/(\d+)/performance/$', 'LSMS.views.performance_list'),
+    url(r'^class/(\d+)/performance/term/(\d+)/$', 'LSMS.views.performance_list'),
+    url(r'^class/(\d+)/performance/term/(\d+)/generate/$', 'LSMS.views.performance_generate'),
+    
+    url(r'^notification/(\d+)/$', 'LSMS.views.notification_read'),
+    
     
     url(r'^class/add/', 'LSMS.views.addfor', {'obj':'class', 'perm':'classmanager'}),
     
     url(r'^notification/add/', 'LSMS.views.addfor', {'obj':'notification', 'perm':'classmanager'}),
     
-    url(r'^event/add/', 'LSMS.views.addfor', {'obj':'event', 'perm':'classmanager'}),
     
     url(r'^read/sturoll', 'LSMS.views.readStuRoll'),
     url(r'^read/stuscore', 'LSMS.views.readStuScore'),

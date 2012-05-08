@@ -10,8 +10,8 @@ function delconfirm()
 <p>Classes you manage are listed below:</p>
 <table>
 <tr><td>Class ID</td><td>Class Name</td><td></td></tr>
-{% for c in cl %}
-<tr><td>{{c.cid}}</td><td>{{c.cname}}</td><td><a href="/mod/class?cid={{c.cid}}">Details</a>|<a href="/del/class?cid={{c.cid}}" onclick="javascript:return delconfirm();">Delete</a></td></tr>
+{% for rec in content %}
+<tr><td>{{rec.class_name}}</td><td>{{rec.grade}}</td><td><a href="/mod/class?cid={{c.cid}}">Details</a>|<a href="/del/class?cid={{c.cid}}" onclick="javascript:return delconfirm();">Delete</a></td></tr>
 {% endfor %}
 </table>
 {% endblock %}  

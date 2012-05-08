@@ -1,0 +1,27 @@
+{% extends "base.html" %}     
+{% block title %}Grade a course{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>
+Class Name:{{clname}}<br />
+Course Name:{{crname}}<br />
+Teacher Name:{{tname}}<br />
+Exam Weight:{{ew}}%
+</p>
+<form action="" method="post">
+{{formset.management_form}}
+<table>
+<tr><td>Student Number</td><td>Student Name</td><td>Exam Score</td><td>Non-exam Score</td></tr>
+{% for rec in formset %}
+<tr>
+	<td>{{rec.instance.student.id}}{{rec.id}}</td>
+	<td>{{rec.instance.student}}</td>
+	<td>{{rec.exam_score}}</td>
+	<td>{{rec.non_exam_score}}</td>
+</tr>
+{% endfor %}
+</table>
+<input type="submit" />
+</form>
+{% endblock %}  

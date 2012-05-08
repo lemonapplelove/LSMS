@@ -10,10 +10,6 @@ import datetime
 from LSMS.SM.forms import *
 from django.contrib.auth.forms import *
 
-def msg(request):
-    return render_to_response('message.html',{'mbody':request.GET.get('mbody',''), 'mtype':request.GET.get('mtype','info')})
-
-
 @login_required
 def home(request):
     homepage={'S':'student_home.html', 'T':'teacher_home.html', 'M':'classmanager_home.html'}
@@ -100,274 +96,105 @@ def addfor(request, *args, **kwargs):
 
     return render(request)
 
-def student_query(request, *args, **kwargs):
-    t_map={
-        'roll':'roll_read.html',
-        'score':'score_read.html',
-    }
-    q_type=args[1]
-    if request.user.has_perm('SM.teacher') or request.user.has_perm('SM.classmanager'):
-        s_obj=Student.objects.get(id=args[0])
+def class_add(request):
+    if request.method=='POST':
+        form=ClassForm(data=request.POST,user=request.user)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/class/')
     else:
-        s_obj=Student.objects.get(user=request.user)
+        form=ClassForm(user=request.user)
+    return render_to_response('class_add.html', {'form': form})
 
-    def template():
-        return t_map[q_type]
-    #return HttpResponse(q_set())
-    
-    return render_to_response(template(),{'content':s_obj})
-    
-    
+def class_list(request):
+    q_set=Class.objects.filter(class_manager__user=request.user)
+    return render_to_response('class_list.html', {'content': q_set})
 
-def readStuNoti(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
+def student_add(request, cid):
+    if request.method=='POST':
+        form=StudentForm(data=request.POST, user=request.user, cid=cid)
+        if form.is_valid():
+            s=form.save()
+            return HttpResponseRedirect('/class/%s/student/' % s.class_obj.id)
     else:
-        if uinfo['utype']=='T':
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Teachers have no notification in student management system.'))
-        elif not request.GET.get('nid',False):
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Invalid entry of notification!'))
-        elif notification.objects.filter(id=request.GET['nid']).count()==0:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Invalid entry of notification!'))
-        else:
-            n=notification.objects.get(id=request.GET['nid'])
-            if (uinfo['utype']=='S' and n.classId==student.objects.get(stuId=uinfo['rid']).classId) or (uinfo['utype']=='M' and cclass.objects.filter(cmId=uinfo['rid'],classId=n.classId).count()!=0):
-                return render_to_response('readnoti.html',{'noti':n})
-            else:
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Invalid entry of notification!'))
+        form=StudentForm(user=request.user, cid=cid)
+    return render_to_response('student_add.html', {'form': form})
 
-def listStuRoll(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.GET)==0 or len(request.GET['cid'])==0:
-            return render_to_response('liststu.html',{'cl':getClassList(uinfo['rid'])})
-        else:
-            return render_to_response('liststu.html',{'cl':getClassList(uinfo['rid']), 'sl':getStuList(request.GET['cid']), 'cid':int(request.GET['cid'])})
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def listStuScore(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='T':
-        crid=request.GET['crid']
-        clid=request.GET['clid']
-        if course.objects.filter(teaId=uinfo['rid'],courseId=crid).count()==0:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You do not teach this course.'))
-        else:
-            od=request.GET.get('orderby','stuId')
-            return render_to_response('listscore.html',getStuScoreList(crid,clid,od))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def listCourse(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='T':
-        if request.GET.get('crid',False):
-            crid=request.GET['crid']
-            if request.GET.get('clid',False):
-                clid=request.GET['clid']
-                return HttpResponseRedirect('/list/stuscore?crid=%s&clid=%s' % (crid,clid))
-            else:
-                sl=courseOnStu.objects.filter(courseId=crid).values_list('stuId',flat=True)
-                cidl=student.objects.filter(classId__in=sl).distinct('classId').values_list('classId',flat=True)
-                cl=[]
-                for c in cclass.objects.filter(classId__in=cidl):
-                    tmp={'cid':c.classId, 'cname':str(c.classGrade)+'-'+c.className}
-                    cl.append(tmp)
-                return render_to_response('listcourse.html',{'cl':cl,'cr':crid})
-        else:
-            return render_to_response('listcourse.html',{'crl':course.objects.filter(teaId=uinfo['rid'])})
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def listStuPerf(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.GET)==0 or len(request.GET['cid'])==0 or len(request.GET['term'])==0:
-            return render_to_response('listperf.html',{'cl':getClassList(uinfo['rid']),'term':int(request.GET.get('term',0))})
-        else:
-            od=request.GET.get('orderby', 'stuId')
-            return render_to_response('listperf.html',{'cl':getClassList(uinfo['rid']), 'spl':getPerfList(request.GET['cid'],int(request.GET['term']), od), 'cid':int(request.GET['cid']), 'term':int(request.GET['term'])})
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def listStuNoti(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        cl=getClassList(uinfo['rid'])
-        if len(request.GET)==0 or not request.GET.get('cid',False):
-            return render_to_response('listnoti.html',{'cl':cl})
-        else:
-            ns=request.GET.get('nscope','all')
-            cid=int(request.GET['cid'])
-            return render_to_response('listnoti.html',{'cl':cl, 'cid':cid, 'nl':getNotiList(cid,ns), 'ns':ns})
-    elif uinfo['utype']=='S':
-        ns=request.GET.get('nscope','all')
-        cid=student.objects.get(stuId=uinfo['rid']).classId
-        return render_to_response('listnoti.html',{'cid':cid, 'nl':getNotiList(cid,ns), 'ns':ns})
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Teacher do not have notification in the system'))
+def student_list(request, cid):
+    q_set=Student.objects.filter(class_obj=cid)
+    return render_to_response('student_list.html', {'content': q_set})
 
-def listClass(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        cl=getClassList(uinfo['rid'])
-        return render_to_response('listclass.html',{'cl':cl})
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
+def student_read(request, sid):
+    q_set=Student.objects.get(id=sid)
+    return render_to_response('student_read.html', {'content': q_set})
 
-def newStuRoll(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            cl=[]
-            for c in cclass.objects.filter(cmId=uinfo['rid']):
-                tmp={'cid':c.classId, 'cname':str(c.classGrade)+'-'+c.className}
-                cl.append(tmp)
-            return render_to_response('newstu.html',{'cl':cl})
-        else:
-            res=saveStu(request.POST['sname'], request.POST['sbirth'], request.POST['sgender'], request.POST['snative'], request.POST['sclass'])
-            if res=='OK':
-                mt='info'
-                res='The student is successfully created!'
-            else:
-                mt='error'
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % (mt,res))
+def event_add(request, sid):
+    if request.method=='POST':
+        form=EventForm(data=request.POST, user=request.user, sid=sid)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/s/%s/roll/' % sid)
     else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def newStuEvent(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            if (student.objects.filter(stuId=request.GET['sid']).count==0) or (cclass.objects.filter(cmId=uinfo['rid'],classId=student.objects.get(stuId=request.GET['sid']).classId).count()==0):
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','No such student in your class!'))
-            else:
-                return render_to_response('newevent.html',{'sid':request.GET['sid'],'sname':student.objects.get(stuId=request.GET['sid']).stuName})
-        else:
-            res=newEvent(request.POST['sid'], request.POST['ebody'], request.POST['etype'], request.POST['edate'], request.POST['eterm'], request.POST['epoint'])
-            if res=='OK':
-                mt='info'
-                res='The event is successfully created!'
-            else:
-                mt='error'
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % (mt,res))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def newStuScore(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='T':
-        if len(request.POST)==0:
-            crid=request.GET['crid']
-            clid=request.GET['clid']
-            if course.objects.filter(teaId=uinfo['rid'],courseId=crid).count()==0:
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You do not teach this course.'))
-            else:
-                return render_to_response('grade.html',getStuScoreList(crid,clid))
-        else:
-            ssheet=eval(request.POST['ssheet'])
-            saveScore(ssheet)
-            #res=newNoti(request.POST['nclass'], request.POST['ntitle'], request.POST['nbody'], request.POST['edate'])
-            #if res=='OK':
-            #    mt='info'
-            #    res='The notification is successfully created!'
-            #else:
-            #    mt='error'
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('info','Score sheet has been saved!'))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def newStuPerf(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            return render_to_response('newperf.html', {'cl':getClassList(uinfo['rid'])})
-        else:
-            res=genPerf(request.POST['cid'], request.POST['term'], int(request.POST['aweight']))
-            if res=='OK':
-                return HttpResponseRedirect('/list/stuperf?cid=%s&term=%s' % (request.POST['cid'], request.POST['term']))
-            else:
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error',res))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def newStuNoti(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            cl=[]
-            for c in cclass.objects.filter(cmId=uinfo['rid']):
-                tmp={'cid':c.classId, 'cname':str(c.classGrade)+'-'+c.className}
-                cl.append(tmp)
-            return render_to_response('newnoti.html',{'cl':cl})
-        else:
-            res=newNoti(request.POST['nclass'], request.POST['ntitle'], request.POST['nbody'], request.POST['edate'])
-            if res=='OK':
-                mt='info'
-                res='The notification is successfully created!'
-            else:
-                mt='error'
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % (mt,res))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
+        form=EventForm(user=request.user, sid=sid)
+    return render_to_response('event_add.html', {'form': form})
 
-def newClass(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            return render_to_response('newclass.html')
-        else:
-            res=saveClass('new', request.POST['cname'], request.POST['grade'], uinfo['rid'])
-            if res=='OK':
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('info','Your class is created!'))
-            else:
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error',res))
+def notification_add(request, cid):
+    if request.method=='POST':
+        form=NotificationForm(data=request.POST, user=request.user, cid=cid)
+        if form.is_valid():
+            n=form.save()
+            return HttpResponseRedirect('/class/%s/notification/' % n.class_obj.id)
     else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
+        form=NotificationForm(user=request.user, cid=cid)
+    return render_to_response('notification_add.html', {'form': form})
+
+def notification_list(request, cid):
+    q_set=Notification.objects.filter(class_obj=cid)
+    return render_to_response('notification_list.html', {'content': q_set})
+
+def notification_read(request, nid):
+    q_set=Notification.objects.get(id=nid)
+    return render_to_response('notification_read.html', {'content': q_set})
+
+def score_grade(request, course_id, class_id):
+    if request.method=='POST':
+        formset=GradeFormSet(data=request.POST)
+        if formset.is_valid():
+            instances=formset.save(commit=False)
+            ew=Course.objects.get(id=course_id).exam_weight
+            for i in instances:
+                if i.exam_score and i.non_exam_score:
+                    i.final_score=(i.exam_score * ew + i.non_exam_score * (100 - ew))/100
+                i.save()
+            return HttpResponseRedirect('/course/%s/class/%s/' % (course_id, class_id))
+    else:
+        formset=GradeFormSet(queryset=CourseOnStudent.objects.filter(course=course_id, student__class_obj=class_id))
+    return render_to_response('score_grade.html', {'formset': formset})
+
+def score_read(request, sid):
+    q_set=CourseOnStudent.objects.filter(student=sid)
+    return render_to_response('score_read.html', {'content': q_set})
+
+def score_list(requst, course_id, class_id):
+    q_set=CourseOnStudent.objects.filter(course=course_id, student__class_obj=class_id)
+    extra_set={
+        'course_info': Course.objects.get(id=course_id),
+        'class_info': Class.objects.get(id=class_id),
+    }    
+    return render_to_response('score_list.html', {'content': q_set, 'extra': extra_set})
+
+def performance_list(request, cid, term=None):
+    cond={'student__class_obj': cid}
+    if term: cond['term']=term
+    q_set=Performance.objects.filter(**cond)
+    return render_to_response('performance_list.html', {'content': q_set})
+
+def performance_generate(request, cid, term=None):
+    amr=request.GET.get('amr', 80)
+    for s in Student.objects.filter(class_obj=cid):
+        s.generate_performance(term, amr)
+    return HttpResponseRedirect('/class/%s/performance/term/%s/' % (cid, term))
+
 
 
 
