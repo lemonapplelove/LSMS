@@ -11,9 +11,21 @@ urlpatterns = patterns('',
     
     url(r'^accounts/login', 'LSMS.views.login'),
     url(r'^accounts/register', 'LSMS.views.register'),
-    url(r'^accounts/modpass', 'LSMS.views.modPass'),
-    url(r'accounts/getpass', 'LSMS.views.getPass'),
-    url(r'accounts/logout', 'LSMS.views.logout'),
+    url(r'^accounts/modifyPassword', 'LSMS.views.modPass'),
+    url(r'^accounts/resetPassword', 'LSMS.views.getPass'),
+    url(r'^accounts/logout', 'LSMS.views.logout'),
+    
+    url(r'^s/(\d+)/(roll|score)/', 'LSMS.views.student_query'),
+    url(r'^t/(\d+)/(course|score)/', 'LSMS.views.teacher_query'),
+    url(r'^cm/(\d+)/(roll|event|score|performance)/', 'LSMS.views.classmanager_query'),
+    
+    url(r'^roll/add/', 'LSMS.views.addfor', {'obj':'roll', 'perm':'classmanager'}),
+    
+    url(r'^class/add/', 'LSMS.views.addfor', {'obj':'class', 'perm':'classmanager'}),
+    
+    url(r'^notification/add/', 'LSMS.views.addfor', {'obj':'notification', 'perm':'classmanager'}),
+    
+    url(r'^event/add/', 'LSMS.views.addfor', {'obj':'event', 'perm':'classmanager'}),
     
     url(r'^read/sturoll', 'LSMS.views.readStuRoll'),
     url(r'^read/stuscore', 'LSMS.views.readStuScore'),

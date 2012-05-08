@@ -10,8 +10,8 @@ Term Filter::<a href='?term=-1'>[All Terms]::</a>|
 <a href='?term=5'>[Term 5]</a>| <a href='?term=6'>[Term 6]</a>| <a href='?term=7'>[Term 7]</a>| <a href='?term=8'>[Term 8]</a>
 <hr>
 <tr><td>Course Name</td><td>Teacher Name</td><td>Course Credit</td><td>Course Type</td><td>Term</td><td>Exam Score</td><td>Non-exam Score</td><td>Final Score</td></tr>
-{% for c in clist %}
-<tr><td>{{c.cname}}</td><td>{{c.tname}}</td><td>{{c.credit}}</td><td>{{c.ctype}}</td><td>{{c.term}}</td><td>{{c.escore}}</td><td>{{c.nscore}}</td><td>{{c.fscore}}</td></tr>
+{% for c in content.courses %}
+{{c.put_row}}
 {% endfor %}
 </table>
 

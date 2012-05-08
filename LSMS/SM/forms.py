@@ -13,12 +13,12 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.http import int_to_base36
 
-class LoginForm(forms.Form):
-    username=forms.CharField()
-    password=forms.CharField(widget=forms.PasswordInput())
-    
-    def login(self):
-        self.username
+#class LoginForm(forms.Form):
+#    username=forms.CharField()
+#    password=forms.CharField(widget=forms.PasswordInput())
+#    
+#    def login(self):
+#        self.username
 
 class RegisterForm(forms.ModelForm):
     username=forms.CharField(label=_("username"))
@@ -27,8 +27,6 @@ class RegisterForm(forms.ModelForm):
     email=forms.EmailField()
     user_type=forms.ChoiceField(choices=(('S', 'Student'), ('T', 'Teacher'), ('M', 'Class Manager')))
     internal_id=forms.CharField(required=True)
-    
-    data_obj={'S':Student, 'T':Teacher, 'M':ClassManager}
     
     class Meta:
         model = User
@@ -66,15 +64,15 @@ class RegisterForm(forms.ModelForm):
     def clean_internal_id(self):
         internalid=self.cleaned_data["internal_id"]
         try:
-            obj=self.data_obj[self.cleaned_data["user_type"]].objects.get(id=internalid, user__isnull=True)
-        except self.data_obj[self.cleaned_data["user_type"]].DoesNotExist:
+            data_obj_map[self.cleaned_data["user_type"]].objects.get(id=internalid, user__isnull=True)
+        except data_obj_map[self.cleaned_data["user_type"]].DoesNotExist:
             raise forms.ValidationError(_("Invalid internal id, or the internal is has been used."))
         return internalid
         
     def save(self, commit=True):
         user = super(RegisterForm, self).save(commit=False)
         profile=Profile()
-        data_obj=self.data_obj[self.cleaned_data["user_type"]].objects.get(id=self.cleaned_data["internal_id"])
+        data_obj=data_obj_map[self.cleaned_data["user_type"]].objects.get(id=self.cleaned_data["internal_id"])
         user.set_password(self.cleaned_data["password"])
         profile.user_type=self.cleaned_data["user_type"]
         if commit:
@@ -86,32 +84,47 @@ class RegisterForm(forms.ModelForm):
             data_obj.save()
         return user
 
-class ClassForm(forms.Form):
-    class_name=forms.CharField()
-    class_grade=forms.IntegerField()
+class ClassForm(forms.ModelForm):
+    class Meta:
+        model = Class
+    
+    def clean(self):
+        c=self.cleaned_data["class_name"]
+        g=self.cleaned_data["grade"]
+        try:
+            Class.objects.get(class_name=c, grade=g)
+        except Class.DoesNotExist:
+            return self.cleaned_data
+        raise forms.ValidationError(_("The class already exists."))
 
-class StudentForm(forms.Form):
-    student_name=forms.CharField()
-    gender=forms.ChoiceField(choices=(('M', 'Male'), ('F', 'Female')))
-    birthday=forms.DateField()
-    native=forms.CharField()
-    student_class=forms.ChoiceField()
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        exclude = ('user',)
+        
+    def __init__(self, user=None, *args, **kwargs):
+        super(StudentForm, self).__init__(*args, **kwargs)
+        self.fields['class_obj'].queryset=Class.objects.filter(class_manager__user=user)
     
-class EventForm(forms.Form):
-    event_description=forms.CharField()
-    event_type=forms.ChoiceField()
-    event_point=forms.CharField()
-    event_date=forms.DateField()
-    effect_term=forms.ChoiceField()
     
-class NotificationForm(forms.Form):
-    notification_title=forms.CharField()
-    notification_body=forms.Textarea()
-    notification_class=forms.ChoiceField()
-    expire_date=forms.DateField()
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = StudentEvent
     
-    def bind_classlist(self, ClassList):
-        self.fields['notification_class'].choices=ClassList
+    def __init__(self, user=None, *args, **kwargs):
+        super(EventForm, self).__init__(*args, **kwargs)
+        self.fields['student'].queryset=Student.objects.filter(class_obj__class_manager__user=user)
+    
+class NotificationForm(forms.ModelForm):
+    class Meta:
+        model = Notification
+        exclude = ('release_date',)
+    
+    def __init__(self, user=None, *args, **kwargs):
+        super(NotificationForm, self).__init__(*args, **kwargs)
+        self.fields['notification_body'].widget=forms.Textarea()
+        self.fields['class_obj'].queryset=Class.objects.filter(class_manager__user=user)
+
 
 class GradeForm(forms.Form):
     student_id=forms.CharField()

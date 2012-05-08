@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib import auth
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 #from LSMS.SM.libs import *
 from LSMS.SM.models import *
 import datetime
@@ -13,10 +13,14 @@ from django.contrib.auth.forms import *
 def msg(request):
     return render_to_response('message.html',{'mbody':request.GET.get('mbody',''), 'mtype':request.GET.get('mtype','info')})
 
+
 @login_required
 def home(request):
     homepage={'S':'student_home.html', 'T':'teacher_home.html', 'M':'classmanager_home.html'}
-    return render_to_response(homepage[str(request.user.get_profile())], None, context_instance=RequestContext(request))
+    try:
+        return render_to_response(homepage[str(request.user.get_profile())], None, context_instance=RequestContext(request))
+    except:
+        return logout(request)
 
 def login(request):
     if request.method == 'POST':
@@ -25,8 +29,8 @@ def login(request):
             auth.login(request, form.get_user())
             return HttpResponseRedirect(request.GET.get('next','/home'))
     else:
-        if request.user.is_authenticated():
-            return HttpResponseRedirect(request.GET.get('next','/home'))
+        #if request.user.is_authenticated():
+            #return HttpResponseRedirect(request.GET.get('next','/home'))
         form=AuthenticationForm()
     return render_to_response('login.html', {'form':form})
 
@@ -41,8 +45,8 @@ def register(request):
             form.save()
             return HttpResponseRedirect('/accounts/login')
     else:
-        form=RegisterForm();
-    return render_to_response('register.html', {'form':form})
+        form=RegisterForm()
+    return render_to_response('register.html', {'form': form})
 
 def modPass(request):
     pass
@@ -51,36 +55,70 @@ def getPass(request):
 def disableUser(requst):
     return HttpResponse('disable user')
 
-def readStuRoll(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    else:
-        if uinfo['utype']=='S':
-            sid=uinfo['rid']
+@login_required
+def read_roll(request, querystr):
+    q_type=querystr[0]
+    q_id=querystr[1:]
+    return HttpResponse('%s,%s' % (q_type, q_id))
+
+#@login_required
+def addfor(request, *args, **kwargs):
+    obj=kwargs['obj']
+    f_map={
+           'roll': (StudentForm, 'userinfo_required', '/roll/add/', 'roll_add.html'),
+           'class': (ClassForm, 'userinfo_not_required', '/class/add/', 'class_add.html'),
+           'notification': (NotificationForm, 'userinfo_required', '/notification/add/', 'notification_add.html'),
+           'event': (EventForm, 'userinfo_required', '/event/add/', 'event_add.html'),
+           #score
+           #'performance': (PerformanceForm, 'userinfo_not_required', '/performance/add/', 'performace_add.html'),
+    }
+    
+    def post_form(t=obj):
+        if f_map[t][1]=='userinfo_required': return f_map[t][0](data=request.POST,user=request.user)
+        else: return f_map[t][0](data=request.POST)
+    
+    def blank_form(t=obj):
+        if f_map[t][1]=='userinfo_required': return f_map[t][0](user=request.user)
+        else: return f_map[t][0]()
+    
+    def redirect_url(t=obj):
+        return f_map[t][2]
+    
+    def template(t=obj):
+        return f_map[t][3]
+    
+    @permission_required('SM.%s' % kwargs.get('perm', ''))
+    def render(request=request):    
+        if request.method=='POST':
+            form=post_form()
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect(redirect_url())
         else:
-            sid=(request.GET['stuId'])
-        s=getStuRoll(sid)
-        s['pl']=getPerf(sid)
-        s['utype']=uinfo['utype']
-        return render_to_response('readroll.html',s)
-def readStuScore(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
+            form=blank_form()
+        return render_to_response(template(), {'form': form})
+
+    return render(request)
+
+def student_query(request, *args, **kwargs):
+    t_map={
+        'roll':'roll_read.html',
+        'score':'score_read.html',
+    }
+    q_type=args[1]
+    if request.user.has_perm('SM.teacher') or request.user.has_perm('SM.classmanager'):
+        s_obj=Student.objects.get(id=args[0])
     else:
-        if uinfo['utype']=='S':
-            s=getStuScore(uinfo['rid'],int(request.GET.get('term',-1)))
-        else:
-            s=getStuScore(request.GET['stuId'],int(request.GET.get('term',-1)))
-        return render_to_response('readscore.html',{'clist':s})
-    return HttpResponse('Student Score Read')
-def readStuPerf(request):
-    return HttpResponse('Student Performance Read')
+        s_obj=Student.objects.get(user=request.user)
+
+    def template():
+        return t_map[q_type]
+    #return HttpResponse(q_set())
+    
+    return render_to_response(template(),{'content':s_obj})
+    
+    
+
 def readStuNoti(request):
     uinfo=getuinfo(request)
     if uinfo['state']=='not logon':
@@ -331,117 +369,6 @@ def newClass(request):
     else:
         return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
 
-def modStuRoll(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            s=getStuRoll(request.GET['sid'])
-            cl=[]
-            for c in cclass.objects.filter(cmId=uinfo['rid']):
-                tmp={'cid':c.classId, 'cname':str(c.classGrade)+'-'+c.className}
-                cl.append(tmp)
-            s['cl']=cl;
-            return render_to_response('modroll.html', s)
-        else:
-            res=saveStu(request.POST['sname'], request.POST['sbirth'], request.POST['sgender'], request.POST['snative'], request.POST['sclass'], request.POST['sid'])
-            if res=='OK':
-                return HttpResponseRedirect('/read/sturoll?stuId=%s' % request.POST['sid'])
-            else:
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error',res))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def modClass(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if len(request.POST)==0:
-            c=cclass.objects.get(classId=request.GET['cid'])
-            cm=cmanager.objects.all()
-            return render_to_response('modclass.html', {'c':c, 'cm':cm})
-        elif uinfo['rid']!=cclass.objects.get(classId=request.POST['cid']).cmId:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission on this class!'))
-        else:
-            res=saveClass(request.POST['cid'], request.POST['cname'], request.POST['grade'], request.POST['cmid'])
-            if res=='OK':
-                return HttpResponseRedirect('/list/class/')
-            else:
-                return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error',res))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
 
-def delStuNoti(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        c=notification.objects.get(id=request.GET['nid'])
-        if cclass.objects.filter(classId=c.classId, cmId=uinfo['rid']).count()!=0:
-            c.delete()
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('info','The notification is deleted!'))
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-def delStuEvent(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        e=stuEvent.objects.get(eventId=request.GET['eid'])
-        c=student.objects.get(stuId=e.stuId)
-        if cclass.objects.filter(classId=c.classId, cmId=uinfo['rid']).count()!=0:
-            e.delete()
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('info','The event is deleted!'))
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-    
-def delClass(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        if student.objects.filter(classId=request.GET['cid']).count() !=0:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','The class is not empty. Can not delete!'))
-        if cclass.objects.filter(classId=request.GET['cid'], cmId=uinfo['rid']).count()!=0:
-            cclass.objects.get(classId=request.GET['cid']).delete()
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('info','The class is deleted!'))
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
 
-def delStuRoll(request):
-    uinfo=getuinfo(request)
-    if uinfo['state']=='not logon':
-        return HttpResponseRedirect('/')
-    elif uinfo['state']=='disabled':
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','Your account is disabled. Please contact the system administrator.'))
-    elif uinfo['utype']=='M':
-        sid=request.GET['sid']
-        cid=student.objects.get(stuId=sid).classId
-        if cclass.objects.filter(classId=cid, cmId=uinfo['rid']).count()!=0:
-            stuEvent.objects.filter(stuId=sid).delete()
-            courseOnStu.objects.filter(stuId=sid).delete()
-            performance.objects.filter(stuId=sid).delete()
-            student.objects.filter(stuId=sid).delete()
-            account.objects.filter(roleId=sid, userType='S').delete()
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('info','The student is deleted!'))
-        else:
-            return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
-    else:
-        return HttpResponseRedirect('/msg?mtype=%s&mbody=%s' % ('error','You have no permission!'))
+

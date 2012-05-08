@@ -1,0 +1,53 @@
+{% extends "base.html" %}     
+{% block title %}Student Roll--{{stuInfo.stuName}}{% endblock %}
+{% block script %}
+function delconfirm()
+{
+	return confirm("Are you sure to delete this event? This process cannot be undone.")
+}
+{% endblock %}     
+{% block content %}   
+<p>Student Roll Information:</p>
+<table>{{content.as_table}}</table>
+
+{% ifequal utype 'M' %} <a href="/new/stuevent?sid={{stuInfo.stuId}}">Add an event to {{stuInfo.stuName}}</a>{% endifequal %}
+<hr>
+Records:
+<table>
+{% for rec in content.records %}
+{% if forloop.first %} {{rec.table_title}} {% endif %}
+{{rec.put_row}}
+{% empty %}
+    <p>There are no records yet.</p>
+{% endfor %}
+</table><hr>
+Awards:
+<table>
+{% for rec in content.awards %}
+{% if forloop.first %} {{rec.table_title}} {% endif %}
+{{rec.put_row}}
+{% empty %}
+    <p>There are no records yet.</p>
+{% endfor %}
+</table><hr>
+Punishments:
+<table>
+<table>
+{% for rec in content.punishments %}
+{% if forloop.first %} {{rec.table_title}} {% endif %}
+{{rec.put_row}}
+{% empty %}
+    <p>There are no records yet.</p>
+{% endfor %}
+</table><hr>
+Performances:
+<table>
+{% for rec in content.performances %}
+{% if forloop.first %} {{rec.table_title}} {% endif %}
+{{rec.put_row}}
+{% empty %}
+    <p>There are no records yet.</p>
+{% endfor %}
+</table>
+
+{% endblock %}  
