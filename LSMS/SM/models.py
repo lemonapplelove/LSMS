@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.db.models import Avg,Sum
 from django.utils import crypto
 from datetime import *
-from LSMS.SM.msg import msg
 from django.utils.safestring import mark_safe
 # Create your models here.
 
@@ -173,6 +172,9 @@ class CourseOnStudent(models.Model):
     exam_score=models.IntegerField(null=True, blank=True)
     non_exam_score=models.IntegerField(null=True, blank=True)
     final_score=models.IntegerField(null=True, blank=True)
+    
+    def __unicode__(self):
+        return '%s-%s' % (self.student.name, self.course)
     
     def put_row(self):
         output = u'<tr>'

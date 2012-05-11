@@ -6,12 +6,12 @@ td { text-align:right}
 {% block script %}
 {% endblock %}     
 {% block content %}   
-<p>请填写注册信息表以注册系统用户。</p>
+<br />
 <form action="" method="post">
-<table>
+<table align=center>
 {{form.as_table}}
+<tr><td colspan=2 style='text-align:center'><input type="submit" value="注册" /></td></tr>
 </table>
-<input type="submit" value="Submit" />
 </form>
   
 {% endblock %}  

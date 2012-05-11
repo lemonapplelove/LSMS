@@ -1,4 +1,5 @@
-{% extends "base.html" %}     
+{% extends "base.html" %} 
+{% load tof %}   
 {% block title %}Student Roll--{{content.name}}{% endblock %}
 {% block style %}
 #basicinfo th,#basicinfo td{
@@ -73,7 +74,7 @@ function delconfirm()
 <tr><th colspan='8' style='background-color:lightblue;'>综合考评:</th></tr>
 {% for rec in content.performances %}
 {% if forloop.first %} <tr><th>ID</th><th>学术成绩</th><th>德育成绩</th><th>嘉奖得分</th><th>综合得分</th><th>考评比重</th><th>考评学期</th><th>生成日期</th></tr> {% endif %}
-{{rec.put_row}}
+<tr><td>{{rec.id}}</td><td>{{rec.academic_score|tof}}</td><td>{{rec.moral_score|tof}}</td><td>{{rec.award_score|tof}}</td><td>{{rec.final_score|tof}}</td><td>{{rec.aca_mor_ratio}}</td><td>{{rec.term}}</td><td>{{rec.generated_date}}</td></tr>
 {% empty %}
     <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该学生当前没有记录。</p></td></tr>
 {% endfor %}

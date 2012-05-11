@@ -9,6 +9,9 @@
     	background: #EEEEEE;
     	font: 100%/1.5 "Microsoft YaHei","Lucida Grande",Verdana;
     }
+    a{
+    	color:blue;
+    }
     table{
     	border-collapse: collapse;
     }
@@ -34,7 +37,7 @@
 	{% block banner %}
 	<div style='width:100%; text-align:right;background-color:#CCCCCC'>欢迎使用LSMS学生信息管理系统！
 	{% if user and user.is_authenticated %}
-	当前用户：{{user}}. <a href='/accounts/logout/'>退出登录</a>
+	当前用户：{{user}}. <a href='/accounts/modifyPassword/'>修改密码</a>|<a href='/accounts/logout/'>退出登录</a>
 	{% endif %}
 	</div>
 	<div style='clear:both;'></div>  
@@ -46,7 +49,7 @@
     {% block content %}{% endblock %}   
     {% block footer %}   
     <hr>
-    <p>Copyright © 2012 Taoyuan 715 First-blood Squad. All rights reserved. <a href="#">Terms of Use</a> · <a href="#">Privacy Policy.</a></p>  
+    <div style="text-align:center; width:100%; font-size:75%">Copyright © 2012 Taoyuan 715 First-blood Squad. All rights reserved. <a href="#">Terms of Use</a> · <a href="#">Privacy Policy.</a></div>  
     {% endblock %}   
 </body>  
 </html>

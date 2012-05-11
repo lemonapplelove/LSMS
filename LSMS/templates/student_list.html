@@ -20,7 +20,12 @@
 <table width=100%>
 <tr><th>学号</th><th>学生姓名</th><th>性别<th>出生日期</th><th>学生籍贯</th><th></th></tr>
 {% for rec in content %}
-<tr><td>{{rec.id}}</td><td>{{rec.name}}</td><td>{{rec.gender}}<td>{{rec.birth}}</td><td>{{rec.native}}</td><td><button onclick='javascript:window.open("/s/{{rec.id}}", "","width=950px,height=700px")'>查看详细信息</button><button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/s/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button></td></tr>
+<tr><td>{{rec.id}}</td><td>{{rec.name}}</td><td>{{rec.gender}}<td>{{rec.birth}}</td><td>{{rec.native}}</td>
+	<td><button onclick='javascript:window.open("/s/{{rec.id}}", "","width=950px,height=700px")'>查看详细信息</button>
+	<button style='background-color:lightgreen' onclick='javascript:window.open("/s/{{rec.id}}/modify", "","width=400px,height=300px")'>修改学生信息</button>
+	<button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/s/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button>
+	</td>
+</tr>
 {% empty %}
     <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该班级当前没有学生。</p></td></tr>
 {% endfor %}

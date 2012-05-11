@@ -12,6 +12,7 @@
 <td><a href="/class/{{rec.id}}"><button>学生管理</button></a>
 	<a href="/class/{{rec.id}}/notification"><button>通知管理</button></a>
 	<a href='/class/{{rec.id}}/performance'><button>综合考评管理</button></a>
+	<button style='background-color:lightgreen' onclick='javascript:window.open("/class/{{rec.id}}/modify", "","width=400px,height=300px,top=400px,left=500px");'>修改班级信息</button>
 	<button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/class/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button>
 </td></tr>
 {% empty %}

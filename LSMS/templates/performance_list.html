@@ -1,4 +1,5 @@
-{% extends "base.html" %}     
+{% extends "base.html" %}   
+{% load tof %}  
 {% block title %}List Performance{% endblock %}
 {% block script %}
 function select_term()
@@ -33,8 +34,6 @@ function generate_performance()
 	<option value='7' {% ifequal '7' extra.selected_term %}selected='select'{% endifequal %}>第7学期</option>
 	<option value='8' {% ifequal '8' extra.selected_term %}selected='select'{% endifequal %}>第8学期</option>
 	</select>
-	
-	{{extra.selected}}
 </p>
 <p>综合考评管理操作：<button onclick=generate_performance()>生成综合考评</button></p>
  
@@ -50,16 +49,24 @@ function generate_performance()
 </td>
 <td width=83%>
 <table width=100%>
-<tr><th>学号</th><th>学生姓名</th><th>考评学期</th><th>学术成绩<th>德育成绩</th><th>奖惩加分</th><th>学术成绩考评比重</th><th>最终成绩</th></tr>
+<tr>
+	<th><a href='?order=student'>学号</a></th>
+	<th>学生姓名</th>
+	<th>考评学期</th>
+	<th><a href='?order=-academic_score'>学术成绩</a></th>
+	<th><a href='?order=-moral_score'>德育成绩</a></th>
+	<th><a href='?order=-award_score'>奖惩加分</a></th>
+	<th>学术成绩考评比重</th>
+	<th><a href='?order=-final_score'>最终成绩</a></th></tr>
 {% for rec in content %}
 <tr><td>{{rec.student.id}}</td>
 <td>{{rec.student}}</td>
 <td>{{rec.term}}</td>
-<td>{{rec.academic_score}}</td>
-<td>{{rec.moral_score}}</td>
-<td>{{rec.award_score}}</td>
+<td>{{rec.academic_score|tof}}</td>
+<td>{{rec.moral_score|tof}}</td>
+<td>{{rec.award_score|tof}}</td>
 <td>{{rec.aca_mor_ratio}}%</td>
-<td>{{rec.final_score}}</td></tr>
+<td>{{rec.final_score|tof}}</td></tr>
 {% empty %}
     <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该班级当前没有综合考评记录。</p></td></tr>
 {% endfor %}

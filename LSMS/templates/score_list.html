@@ -23,11 +23,11 @@ p{
 <br />
 <table width=100%>
 <tr>
-	<th>学号</th>
+	<th><a href='?order=id'>学号</a></th>
 	<th>学生姓名</th>
-	<th>考试成绩</th>
-	<th>非考试成绩</th>
-	<th>最终成绩</th>
+	<th><a href='?order=-exam_score'>考试成绩</a></th>
+	<th><a href='?order=-non_exam_score'>非考试成绩</a></th>
+	<th><a href='?order=-final_score'>最终成绩</a></th>
 {% for rec in content %}
 <tr>
 	<td>{{rec.student.id}}</td>

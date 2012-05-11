@@ -10,23 +10,40 @@ p{
 }
 {% endblock %}
 {% block script %}
-function delconfirm()
+function select_term()
 {
-	return confirm("Are you sure to delete this event? This process cannot be undone.")
+	term=document.getElementById('termfilter').value;
+	url='/s/{{extra.student.id}}/score/';
+	if(term !=0) url+='term/'+term;
+	window.location.href=url;
+	
 }
 {% endblock %}     
 {% block banner %}{% endblock %}
 {% block content %}   
-<p style='width:100%;background-color:#DDDDDD;font-size:150%'>学生成绩[{{extra.name}}]:</p>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>学生成绩[{{extra.student.name}}]:</p>
 <table id='basicinfo'>
-<tr><th>学号</th><td>{{extra.id}}</td>
-<th>学生姓名</th><td>{{extra.name}}</td>
-<th>出生日期</th><td>{{extra.birth}}</td>
-<th>性别</th><td>{{extra.gender}}</td>
-<th>班级</th><td>{{extra.class_obj}}</td>
-<th>系统帐号</th><td>{{extra.user}}</td></tr>
+<tr><th>学号</th><td>{{extra.student.id}}</td>
+<th>学生姓名</th><td>{{extra.student.name}}</td>
+<th>出生日期</th><td>{{extra.student.birth}}</td>
+<th>性别</th><td>{{extra.student.gender}}</td>
+<th>班级</th><td>{{extra.student.class_obj}}</td>
+<th>系统帐号</th><td>{{user}}</td></tr>
 </table>
 <p>
+<p>
+   选择学期:<select id='termfilter' onchange=select_term()>
+	<option value='0' {% if not selected_term %}selected='select'{% endif %}>所有学期</option>
+	<option value='1' {% ifequal '1' extra.selected_term %}selected='select'{% endifequal %}>第1学期</option>
+	<option value='2' {% ifequal '2' extra.selected_term %}selected='select'{% endifequal %}>第2学期</option>
+	<option value='3' {% ifequal '3' extra.selected_term %}selected='select'{% endifequal %}>第3学期</option>
+	<option value='4' {% ifequal '4' extra.selected_term %}selected='select'{% endifequal %}>第4学期</option>
+	<option value='5' {% ifequal '5' extra.selected_term %}selected='select'{% endifequal %}>第5学期</option>
+	<option value='6' {% ifequal '6' extra.selected_term %}selected='select'{% endifequal %}>第6学期</option>
+	<option value='7' {% ifequal '7' extra.selected_term %}selected='select'{% endifequal %}>第7学期</option>
+	<option value='8' {% ifequal '8' extra.selected_term %}selected='select'{% endifequal %}>第8学期</option>
+	</select>
+</p>
 <table width=100%>
 <tr>
 	<th>课程名称</th>
@@ -49,6 +66,8 @@ function delconfirm()
 	<td>{{rec.non_exam_score}}</td>
 	<td>{{rec.final_score}}</td>
 </tr>
+{% empty %}
+	<tr><td><p style='width:200px;background-color:pink;font-size:90%'>当前没有课程成绩记录。</p></td></tr>
 {% endfor %}
 </table>
 {% endblock %}  

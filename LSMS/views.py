@@ -49,10 +49,27 @@ def register(request):
         form=RegisterForm()
     return render_to_response('register.html', {'form': form}, context_instance=RequestContext(request))
 
-def modPass(request):
-    pass
-def getPass(request):
-    pass
+@login_required
+def password_modify(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/accounts/logout/')
+    else:
+        #if request.user.is_authenticated():
+            #return HttpResponseRedirect(request.GET.get('next','/home'))
+        form=PasswordChangeForm(user=request.user)
+    return render_to_response('password_modify.html', {'form':form}, context_instance=RequestContext(request))
+def password_reset(request):
+    if request.method == 'POST':
+        form = PasswordResetForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/accounts/logout/')
+    else:
+        form=PasswordResetForm()
+    return render_to_response('password_reset.html', {'form':form}, context_instance=RequestContext(request))
 def disableUser(requst):
     return HttpResponse('disable user')
 
@@ -107,10 +124,21 @@ def class_add(request):
         form=ClassForm(data=request.POST,user=request.user)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/class/')
+            return HttpResponse('<script>window.opener.location.replace(window.opener.location.href);window.close();</script>')
     else:
         form=ClassForm(user=request.user)
     return render_to_response('class_add.html', {'form': form}, context_instance=RequestContext(request))
+
+@permission_required('SM.classmanager')
+def class_modify(request, cid):
+    if request.method=='POST':
+        form=ClassForm(data=request.POST,user=request.user, instance=Class.objects.get(id=cid))
+        if form.is_valid():
+            form.save()
+            return HttpResponse('<script>window.opener.location.replace(window.opener.location.href);window.close();</script>')
+    else:
+        form=ClassForm(user=request.user, instance=Class.objects.get(id=cid))
+    return render_to_response('class_modify.html', {'form': form}, context_instance=RequestContext(request))
 
 @permission_required('SM.classmanager')
 def class_list(request):
@@ -128,6 +156,19 @@ def student_add(request, cid):
     else:
         form=StudentForm(user=request.user, cid=cid)
     return render_to_response('student_add.html', {'form': form}, context_instance=RequestContext(request))
+
+@permission_required('SM.classmanager')
+def student_modify(request, sid):
+    if request.method=='POST':
+        s=Student.objects.get(id=sid)
+        form=StudentForm(data=request.POST,user=request.user, instance=s, cid=s.class_obj)
+        if form.is_valid():
+            form.save()
+            return HttpResponse('<script>window.opener.location.replace(window.opener.location.href);window.close();</script>')
+    else:
+        s=Student.objects.get(id=sid)
+        form=StudentForm(user=request.user, instance=s, cid=s.class_obj)
+    return render_to_response('student_modify.html', {'form': form}, context_instance=RequestContext(request))
 
 @permission_required('SM.classmanager')
 def student_list(request, cid):
@@ -194,14 +235,22 @@ def score_grade(request, course_id, class_id):
     return render_to_response('score_grade.html', {'formset': formset, 'extra': extra_set}, context_instance=RequestContext(request))
 
 @permission_required('SM.student')
-def score_read(request, sid):
+def score_read(request, sid, term=None):
     q_set=CourseOnStudent.objects.filter(student=sid)
-    extra_set=Student.objects.get(id=sid)
+    extra_set={
+        'student':Student.objects.get(id=sid),
+        'selected_term': term,
+    }
+    if term:
+        q_set=q_set.filter(term=term)
     return render_to_response('score_read.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
 @permission_required('SM.teacher')
 def score_list(request, course_id, class_id):
     q_set=CourseOnStudent.objects.filter(course=course_id, student__class_obj=class_id)
+    order=request.GET.get('order', False)
+    if order:
+        q_set=q_set.order_by(order)
     extra_set={
         'course_info': Course.objects.get(id=course_id),
         'class_info': Class.objects.get(id=class_id),
@@ -225,6 +274,9 @@ def performance_list(request, cid, term=None):
     if term: cond['term']=term
     q_set=Performance.objects.filter(**cond)
     extra_set={'class': Class.objects.get(id=cid), 'classes':Class.objects.filter(class_manager__user=request.user), 'selected_term':term}
+    order=request.GET.get('order', False)
+    if order:
+        q_set=q_set.order_by(order)
     return render_to_response('performance_list.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
 @permission_required('SM.classmanager')
