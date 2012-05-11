@@ -3,11 +3,23 @@
 {% block script %}
 {% endblock %}     
 {% block content %}   
-<p>Welcome, {{name}} ({{user.username}})! If you want to modify your password, please click here:<a href="/accounts/modifyPassword">Modify my account</a></p>
-<p>Please select an action!</p>
-<a href="/read/sturoll">Query my student roll</a>
-<a href="/read/stuscore">Query my scores</a>
-<a href="/list/stunoti">Query my notifications</a>
-<br />
+<p>查询操作：
+	<button onclick='javascript:window.open("/s/{{content.id}}", "","width=950px,height=700px")'>查询学生信息</button>
+	<button onclick='javascript:window.open("/s/{{content.id}}/score", "","width=950px,height=700px")'>查询课程成绩</button>
+</p>
+{% for rec in content.notifications|slice:":5" %}
+{% if forloop.first%}
+<table width=100%>
+<tr><th>通知标题</th><th>通知时间</th><th>过期时间</th><th></th></tr>
+{% endif %}
+<tr><td><a href='#' onclick='javascript:window.open("/notification/{{rec.id}}", "","width=950px,height=700px")'>{{rec.notification_title}}</a></td><td>{{rec.release_date}}</td><td>{{rec.expire_date}}</td></tr>
+{% if forloop.last %}
+</table>
+<button onclick='javascript:window.open("/class/{{content.class_obj.id}}/notification/", "","width=950px,height=700px")'>查看更多通知</button>
+{% endif %}
+{% empty %}
+    <p style='width:200px;background-color:pink;font-size:90%'>该班级当前没有通知。</p>
+{% endfor %}
+
 
 {% endblock %}  

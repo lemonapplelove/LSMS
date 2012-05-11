@@ -1,49 +1,74 @@
 {% extends "base.html" %}     
 {% block title %}List Performance{% endblock %}
 {% block script %}
+function select_term()
+{
+	term=document.getElementById('termfilter').value;
+	url='/class/{{extra.class.id}}/performance/';
+	if(term !=0) url+='term/'+term;
+	window.location.href=url;
+	
+}
+
+function generate_performance()
+{
+	term=document.getElementById('termfilter').value;
+	if(term ==0) return alert("请选择考评学期！");
+	else{
+	amr=prompt("请输入学术/德育考评比重", "80")
+	window.location.replace('/class/{{extra.class.id}}/performance/term/'+term+'/generate/?amr='+amr);
+	}
+}
 {% endblock %}     
 {% block content %}   
-<p>
-<form name="flistperf" action="/list/stuperf/" method="get" id="flistperf">
-Please select a class:<select name="cid">
-<option value=""></option>
-{% for c in cl %}
-<option value="{{c.cid}}" {% ifequal c.cid cid%}selected="selected"{% endifequal %}>{{c.cname}}</option>
-{% endfor %}
-</select>
-Term:
-<select name="term" >
-<option value=1 {% ifequal term 1 %}selected="selected"{% endifequal %}>第1学期</option>
-<option value=2 {% ifequal term 2 %}selected="selected"{% endifequal %}>第2学期</option>
-<option value=3 {% ifequal term 3 %}selected="selected"{% endifequal %}>第3学期</option>
-<option value=4 {% ifequal term 4 %}selected="selected"{% endifequal %}>第4学期</option>
-<option value=5 {% ifequal term 5 %}selected="selected"{% endifequal %}>第5学期</option>
-<option value=6 {% ifequal term 6 %}selected="selected"{% endifequal %}>第6学期</option>
-<option value=7 {% ifequal term 7 %}selected="selected"{% endifequal %}>第7学期</option>
-<option value=8 {% ifequal term 8 %}selected="selected"{% endifequal %}>第8学期</option>
-</select>
-<input type="submit" value="Query" />
-</form>
+<p>班级:<input type='text' disabled='true' value='{{extra.class}}' size='50'>
+   选择学期:<select id='termfilter' onchange=select_term()>
+	<option value='0' {% if not selected_term %}selected='select'{% endif %}>所有学期</option>
+	<option value='1' {% ifequal '1' extra.selected_term %}selected='select'{% endifequal %}>第1学期</option>
+	<option value='2' {% ifequal '2' extra.selected_term %}selected='select'{% endifequal %}>第2学期</option>
+	<option value='3' {% ifequal '3' extra.selected_term %}selected='select'{% endifequal %}>第3学期</option>
+	<option value='4' {% ifequal '4' extra.selected_term %}selected='select'{% endifequal %}>第4学期</option>
+	<option value='5' {% ifequal '5' extra.selected_term %}selected='select'{% endifequal %}>第5学期</option>
+	<option value='6' {% ifequal '6' extra.selected_term %}selected='select'{% endifequal %}>第6学期</option>
+	<option value='7' {% ifequal '7' extra.selected_term %}selected='select'{% endifequal %}>第7学期</option>
+	<option value='8' {% ifequal '8' extra.selected_term %}selected='select'{% endifequal %}>第8学期</option>
+	</select>
+	
+	{{extra.selected}}
 </p>
-{% if content %}
-<table>
-<tr>
-<td><a href="?cid={{cid}}&term={{term}}&orderby=stuId">Student Number</a></td>
-<td>Name</td>
-<td><a href="?cid={{cid}}&term={{term}}&orderby=ACA">Academic Score</a></td>
-<td><a href="?cid={{cid}}&term={{term}}&orderby=MOR">Moral Score</a></td>
-<td><a href="?cid={{cid}}&term={{term}}&orderby=AWA">Award Score</a></td>
-<td><a href="?cid={{cid}}&term={{term}}&orderby=FIN">Final Score</a></td>
-</tr>
+<p>综合考评管理操作：<button onclick=generate_performance()>生成综合考评</button></p>
+ 
+<table width=100%>
+<tr style='vertical-align:top'>
+<td width=17% style='background-color:#DDDDDD'>
+<table style='vertical-align:top'>
+<tr><th>班级列表：<a href='/class'><button>返回班级列表</button></a></th></tr>
+{% for rec in extra.classes %}
+<tr><td><a href='/class/{{rec.id}}/performance'>{{rec}}</a></td></tr>
+{% endfor %}
+</table>
+</td>
+<td width=83%>
+<table width=100%>
+<tr><th>学号</th><th>学生姓名</th><th>考评学期</th><th>学术成绩<th>德育成绩</th><th>奖惩加分</th><th>学术成绩考评比重</th><th>最终成绩</th></tr>
 {% for rec in content %}
 <tr><td>{{rec.student.id}}</td>
 <td>{{rec.student}}</td>
+<td>{{rec.term}}</td>
 <td>{{rec.academic_score}}</td>
 <td>{{rec.moral_score}}</td>
 <td>{{rec.award_score}}</td>
+<td>{{rec.aca_mor_ratio}}%</td>
 <td>{{rec.final_score}}</td></tr>
+{% empty %}
+    <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该班级当前没有综合考评记录。</p></td></tr>
 {% endfor %}
 </table>
-{% endif %}
- 
+</td>
+</tr>
+</table>
+
+
+
+
 {% endblock %}  

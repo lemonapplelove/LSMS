@@ -1,22 +1,33 @@
 {% extends "base.html" %}     
 {% block title %}List Performance{% endblock %}
+{% block style %}
+th,td{
+	border: 1px solid black;
+	padding: 3px 8px;
+}
+p{
+	background-color:#DDDDDD;
+}
+{% endblock %}
 {% block script %}
-{% endblock %}     
+{% endblock %}    
+{% block banner %}{% endblock %} 
 {% block content %}   
-<p>
-Class Name:{{extra.class_info}}<br />
-Course Name:{{extra.course_info}}<br />
-Teacher Name:{{extra.course_info.teacher}}<br />
-Exam Weight:{{extra.course_info.exam_weight}}%<br />
-<a href="/new/stuscore?crid={{crid}}&clid={{clid}}">Grade</a>
-</p>
-<table>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>成绩单[{{extra.course_info}}-{{extra.class_info}}]:</p>
+<table id='basicinfo'>
+<tr><th>班级：</th><td>{{extra.class_info}}</td>
+<th>课程：</th><td>{{extra.course_info}}</td>
+<th>任课教师：</th><td>{{extra.course_info.teacher}}</td>
+<th>考试比重：</th><td>{{extra.course_info.exam_weight}}%</td></tr>
+</table>
+<br />
+<table width=100%>
 <tr>
-	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=stuId">Student Number</a></td>
-	<td>Student Name</td>
-	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-examScore">Exam Score</a></td>
-	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-nonExamScore">Non-exam Score</a></td>
-	<td><a href="?crid={{crid}}&clid={{clid}}&orderby=-finalScore">Final Score</a></td></tr>
+	<th>学号</th>
+	<th>学生姓名</th>
+	<th>考试成绩</th>
+	<th>非考试成绩</th>
+	<th>最终成绩</th>
 {% for rec in content %}
 <tr>
 	<td>{{rec.student.id}}</td>
@@ -27,5 +38,5 @@ Exam Weight:{{extra.course_info.exam_weight}}%<br />
 </tr>
 {% endfor %}
 </table>
- 
 {% endblock %}  
+{% block footer %}{% endblock %}

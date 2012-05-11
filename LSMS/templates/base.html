@@ -7,7 +7,22 @@
     <style>
     body{
     	background: #EEEEEE;
-    	font: 12px arial;
+    	font: 100%/1.5 "Microsoft YaHei","Lucida Grande",Verdana;
+    }
+    table{
+    	border-collapse: collapse;
+    }
+    th{
+    	background-color: #DDDDDD;
+    	padding: 3px 8px;
+    	text-align:left;
+    }
+    td{
+    	padding: 3px 8px;
+    }
+    button{
+    	background-color: lightblue;
+    	font: 100%/1.5 "Microsoft YaHei","Lucida Grande",Verdana;
     }
     {% block style %}{% endblock %}
     </style>
@@ -15,10 +30,20 @@
     {% block script %}{% endblock %}
     </script>
 </head>  
-<body>  
-    <h1>Keng-Daddy Student Management System</h1>
-    {% block nav %}{% endblock %}
-    {% block content %}<a href="/">Home Page</a>|<a href="/user/logout">Logout</a>{% endblock %}   
+<body>
+	{% block banner %}
+	<div style='width:100%; text-align:right;background-color:#CCCCCC'>欢迎使用LSMS学生信息管理系统！
+	{% if user and user.is_authenticated %}
+	当前用户：{{user}}. <a href='/accounts/logout/'>退出登录</a>
+	{% endif %}
+	</div>
+	<div style='clear:both;'></div>  
+    <div style='width:100%; font:235%/1.5 "Microsoft YaHei","Lucida Grande",Verdana; text-align:center; background-color: #DDDDDD'  onclick='javascript:window.location.href="/"'>LSMS 学生信息管理系统</div>
+    {% endblock %}
+    {% block nav %}
+    
+    {% endblock %}
+    {% block content %}{% endblock %}   
     {% block footer %}   
     <hr>
     <p>Copyright © 2012 Taoyuan 715 First-blood Squad. All rights reserved. <a href="#">Terms of Use</a> · <a href="#">Privacy Policy.</a></p>  

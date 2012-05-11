@@ -1,17 +1,21 @@
 {% extends "base.html" %}     
-{% block title %}List Notification{% endblock %}
+{% block title %}LSMS学生信息管理系统-班级管理{% endblock %}
 {% block script %}
-function delconfirm()
-{
-	return confirm("Are you sure to delete this class? This process cannot be undone.")
-}
 {% endblock %}     
 {% block content %}   
-<p>Classes you manage are listed below:</p>
-<table>
-<tr><td>Class ID</td><td>Class Name</td><td></td></tr>
+<p>班级操作：<button onclick='javascript:window.open("/class/add", "","width=400px,height=300px")'>添加班级</button>
+<p>以下是您所管理的班级：</p>
+<table width=100%>
 {% for rec in content %}
-<tr><td>{{rec.class_name}}</td><td>{{rec.grade}}</td><td><a href="/mod/class?cid={{c.cid}}">Details</a>|<a href="/del/class?cid={{c.cid}}" onclick="javascript:return delconfirm();">Delete</a></td></tr>
+{% if forloop.first %}<tr><th>班级名称</th><th>年级</th><th></th></tr>{% endif %}
+<tr><td>{{rec.class_name}}</td><td>{{rec.grade}}</td>
+<td><a href="/class/{{rec.id}}"><button>学生管理</button></a>
+	<a href="/class/{{rec.id}}/notification"><button>通知管理</button></a>
+	<a href='/class/{{rec.id}}/performance'><button>综合考评管理</button></a>
+	<button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/class/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button>
+</td></tr>
+{% empty %}
+当前还没有您所管理的班级记录，您可以<a href='add'>点击这里</a>新建一个班级。
 {% endfor %}
 </table>
 {% endblock %}  

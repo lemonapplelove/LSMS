@@ -1,53 +1,83 @@
 {% extends "base.html" %}     
-{% block title %}Student Roll--{{stuInfo.stuName}}{% endblock %}
+{% block title %}Student Roll--{{content.name}}{% endblock %}
+{% block style %}
+#basicinfo th,#basicinfo td{
+	border: 1px solid black;
+	padding: 3px 8px;
+}
+p{
+	background-color:#DDDDDD;
+}
+{% endblock %}
 {% block script %}
 function delconfirm()
 {
 	return confirm("Are you sure to delete this event? This process cannot be undone.")
 }
 {% endblock %}     
+{% block banner %}{% endblock %}
 {% block content %}   
-<p>Student Roll Information:</p>
-<table>{{content.as_table}}</table>
-
-{% ifequal utype 'M' %} <a href="/new/stuevent?sid={{stuInfo.stuId}}">Add an event to {{stuInfo.stuName}}</a>{% endifequal %}
-<hr>
-Records:
-<table>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>学生信息[{{content.name}}]:</p>
+<table id='basicinfo'>
+<tr><th>学号</th><td>{{content.id}}</td>
+<th>学生姓名</th><td>{{content.name}}</td>
+<th>出生日期</th><td>{{content.birth}}</td>
+<th>性别</th><td>{{content.gender}}</td>
+<th>班级</th><td>{{content.class_obj}}</td>
+<th>系统帐号</th><td>{{content.user}}</td></tr>
+</table>
+<p>
+{% if user.classmanager_set.all %}<button onclick='javascript:window.open("/s/{{content.id}}/event/add", "","width=400px,height=320px")'>添加学生事件</button>{% endif %}
+</p>
+<table width=100%>
+<tr><th colspan='5' style='background-color:lightblue;'>学生事件-记录:</th></tr>
 {% for rec in content.records %}
-{% if forloop.first %} {{rec.table_title}} {% endif %}
-{{rec.put_row}}
+{% if forloop.first %} <tr><th>记录</th><th>分数</th><th>记录日期</th><th>有效学期</th><th></th></tr> {% endif %}
+<tr><td>{{rec.event_body}}</td>
+	<td>{{rec.point}}</td><td>{{rec.event_date}}</td>
+	<td>{{rec.effect_term}}</td>
+	<td>{% if user.classmanager_set.all %}<button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/event/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button>{% endif %}</td>
+</tr>
 {% empty %}
-    <p>There are no records yet.</p>
+    <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该学生当前没有记录。</p></td></tr>
 {% endfor %}
-</table><hr>
-Awards:
-<table>
+
+<tr><th colspan='5' style='background-color:lightblue;'>学生事件-获奖:</th></tr>
+
 {% for rec in content.awards %}
-{% if forloop.first %} {{rec.table_title}} {% endif %}
-{{rec.put_row}}
+{% if forloop.first %} <tr><th>获奖</th><th>分数</th><th>记录日期</th><th>有效学期</th><th></th></tr> {% endif %}
+<tr><td>{{rec.event_body}}</td>
+	<td>{{rec.point}}</td><td>{{rec.event_date}}</td>
+	<td>{{rec.effect_term}}</td>
+	<td>{% if user.classmanager_set.all %}<button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/event/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button>{% endif %}</td>
+</tr>
 {% empty %}
-    <p>There are no records yet.</p>
+    <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该学生当前没有记录。</p></td></tr>
 {% endfor %}
-</table><hr>
-Punishments:
-<table>
-<table>
+
+<tr><th colspan='5' style='background-color:lightblue;'>学生事件-处分:</th></tr>
+
 {% for rec in content.punishments %}
-{% if forloop.first %} {{rec.table_title}} {% endif %}
-{{rec.put_row}}
+{% if forloop.first %} <tr><th>处分</th><th>分数</th><th>记录日期</th><th>有效学期</th><th></th></tr> {% endif %}
+<tr><td>{{rec.event_body}}</td>
+	<td>{{rec.point}}</td><td>{{rec.event_date}}</td>
+	<td>{{rec.effect_term}}</td>
+	<td>{% if user.classmanager_set.all %}<button style='background-color:pink' onclick='javascript:if(confirm("确认删除?"))window.open("/event/{{rec.id}}/delete", "","width=0px,height=0px,top=400px,left=500px");'>删除</button>{% endif %}</td>
+</tr>
 {% empty %}
-    <p>There are no records yet.</p>
+    <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该学生当前没有记录。</p></td></tr>
 {% endfor %}
-</table><hr>
-Performances:
-<table>
+</table>
+<p></p>
+<table width=100%>
+<tr><th colspan='8' style='background-color:lightblue;'>综合考评:</th></tr>
 {% for rec in content.performances %}
-{% if forloop.first %} {{rec.table_title}} {% endif %}
+{% if forloop.first %} <tr><th>ID</th><th>学术成绩</th><th>德育成绩</th><th>嘉奖得分</th><th>综合得分</th><th>考评比重</th><th>考评学期</th><th>生成日期</th></tr> {% endif %}
 {{rec.put_row}}
 {% empty %}
-    <p>There are no records yet.</p>
+    <tr><td><p style='width:200px;background-color:pink;font-size:90%'>该学生当前没有记录。</p></td></tr>
 {% endfor %}
 </table>
 
 {% endblock %}  
+{% block footer %}{% endblock %}

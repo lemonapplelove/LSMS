@@ -1,12 +1,12 @@
 {% extends "base.html" %}     
-{% block title %}Notification--{{noti.notiTitle}}{% endblock %}
+{% block title %}Notification--{{content.notification_title}}{% endblock %}
 {% block script %}
 {% endblock %}     
+{% block banner %}{% endblock %}
 {% block content %}   
-<p>Notification:{{content.notification_title}}<br />Date:{{content.release_date}}</p>
-<p>This notification will expire on {{content.expire_date}}</p>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>通知：{{content.notification_title}}</p>
+<p>日期:{{content.release_date}}, 该通知将于{{content.expire_date}}过期.</p>
 <hr>
 <p><pre>{{content.notification_body}}</pre></pre></p>
-
-
 {% endblock %}  
+{% block footer %}{% endblock %}

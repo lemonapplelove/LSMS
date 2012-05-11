@@ -1,3 +1,4 @@
+#coding: utf-8
 from django import forms
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.contrib import auth
@@ -25,8 +26,8 @@ class RegisterForm(forms.ModelForm):
     password=forms.CharField(label=_("Password"), widget=forms.PasswordInput())
     password_confirm=forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput())
     email=forms.EmailField()
-    user_type=forms.ChoiceField(choices=(('S', 'Student'), ('T', 'Teacher'), ('M', 'Class Manager')))
-    internal_id=forms.CharField(required=True)
+    user_type=forms.ChoiceField(label='用户类型', choices=(('S', 'Student'), ('T', 'Teacher'), ('M', 'Class Manager')))
+    internal_id=forms.CharField(label='学号/教师号', required=True)
     
     class Meta:
         model = User
@@ -128,7 +129,8 @@ class NotificationForm(forms.ModelForm):
     
     def __init__(self, user=None, cid=None, *args, **kwargs):
         super(NotificationForm, self).__init__(*args, **kwargs)
-        self.fields['notification_body'].widget=forms.Textarea()
+        self.fields['notification_title'].widget.attrs={'size':'91'}
+        self.fields['notification_body'].widget=forms.Textarea(attrs={'rows':'20', 'cols':'70'})
         self.fields['class_obj'].queryset=Class.objects.filter(class_manager__user=user)
         self.fields['class_obj'].initial=cid
 

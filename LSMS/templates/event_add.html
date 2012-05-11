@@ -1,11 +1,12 @@
 {% extends "base.html" %}     
 {% block title %}New Event{% endblock %}
-{% block script %}
-{% endblock %}     
+{% block script %}{% endblock %} 
+{% block banner %}{% endblock %}    
 {% block content %}   
-<p>Please fill in the form!</p>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>添加学生事件:</p>
 <form action="" method="post">
 <table>{{form.as_table}}</table>
 <input type="submit" value="Submit" />
 </form>  
-{% endblock %}  
+{% endblock %}
+{% block footer %}{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}     
+{% block title %}LSMS学生信息管理系统-成绩管理{% endblock %}
+{% block script %}
+{% endblock %}     
+{% block content %}   
+<p>以下是您所教授的课程：</p>
+<table width=100%>
+<tr style='vertical-align:top'>
+<td width=25% style='background-color:#DDDDDD'>
+<table style='vertical-align:top'>
+{% for rec in content %}
+{% if forloop.first %}<tr><th>课程编号</th><th>课程名称</th><th></th></tr>{% endif %}
+<tr><td>{{rec.id}}</td><td>{{rec}}</td>
+<td><a href="/course/{{rec.id}}/class/"><button>查看授课班级</button></a>
+</td></tr>
+{% empty %}
+当前没有您教授的课程。
+{% endfor %}
+</table>
+</td>
+<td width=75%>
+<table width=100%>
+{% if not extra.course_id %}
+请选择课程。
+{% else %}
+{% for rec in extra.classes %}
+{% if forloop.first %}<tr><th>班级编号</th><th>班级名称</th><th></th></tr>{% endif %}
+<tr><td>{{rec.id}}</td><td>{{rec}}</td>
+<td><button onclick='javascript:window.open("/course/{{extra.course_id}}/class/{{rec.id}}/", "","width=800px,height=600px")'>查看课程成绩</button>
+	<button onclick='javascript:window.open("/course/{{extra.course_id}}/class/{{rec.id}}/grade", "","width=800px,height=600px")'>录入成绩</button>
+</td></tr>
+{% empty %}
+当前没有学生选择该课程。
+{% endfor %}
+{% endif %}
+</table>
+</td>
+</tr>
+</table>
+{% endblock %}  

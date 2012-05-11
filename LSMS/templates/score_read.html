@@ -1,23 +1,42 @@
 {% extends "base.html" %}     
 {% block title %}Student Course Score--{{stuInfo.stuName}}{% endblock %}
+{% block style %}
+#basicinfo th,#basicinfo td{
+	border: 1px solid black;
+	padding: 3px 8px;
+}
+p{
+	background-color:#DDDDDD;
+}
+{% endblock %}
 {% block script %}
+function delconfirm()
+{
+	return confirm("Are you sure to delete this event? This process cannot be undone.")
+}
 {% endblock %}     
+{% block banner %}{% endblock %}
 {% block content %}   
-<p>Student Course Score:</p>
-<table>
-Term Filter::<a href='?term=-1'>[All Terms]::</a>|
-<a href='?term=1'>[Term 1]</a>| <a href='?term=2'>[Term 2]</a>| <a href='?term=3'>[Term 3]</a>| <a href='?term=4'>[Term 4]</a>|
-<a href='?term=5'>[Term 5]</a>| <a href='?term=6'>[Term 6]</a>| <a href='?term=7'>[Term 7]</a>| <a href='?term=8'>[Term 8]</a>
-<hr>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>学生成绩[{{extra.name}}]:</p>
+<table id='basicinfo'>
+<tr><th>学号</th><td>{{extra.id}}</td>
+<th>学生姓名</th><td>{{extra.name}}</td>
+<th>出生日期</th><td>{{extra.birth}}</td>
+<th>性别</th><td>{{extra.gender}}</td>
+<th>班级</th><td>{{extra.class_obj}}</td>
+<th>系统帐号</th><td>{{extra.user}}</td></tr>
+</table>
+<p>
+<table width=100%>
 <tr>
-	<th>Course Name</th>
-	<th>Teacher Name</th>
-	<th>Course Credit</th>
-	<th>Course Type</th>
-	<th>Term</th>
-	<th>Exam Score</th>
-	<th>Non-exam Score</th>
-	<th>Final Score</th>
+	<th>课程名称</th>
+	<th>授课教师</th>
+	<th>课程学分</th>
+	<th>课程类型</th>
+	<th>开课学期</th>
+	<th>考试成绩</th>
+	<th>非考试成绩</th>
+	<th>最终成绩</th>
 </tr>
 {% for rec in content %}
 <tr>
@@ -32,5 +51,5 @@ Term Filter::<a href='?term=-1'>[All Terms]::</a>|
 </tr>
 {% endfor %}
 </table>
-
 {% endblock %}  
+{% block footer %}{% endblock %}

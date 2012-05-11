@@ -1,18 +1,30 @@
 {% extends "base.html" %}     
 {% block title %}Grade a course{% endblock %}
+{% block style %}
+#basicinfo th,#basicinfo td{
+	border: 1px solid black;
+	padding: 3px 8px;
+}
+p{
+	background-color:#DDDDDD;
+}
+{% endblock %}
 {% block script %}
-{% endblock %}     
+{% endblock %}    
+{% block banner %}{% endblock %} 
 {% block content %}   
-<p>
-Class Name:{{clname}}<br />
-Course Name:{{crname}}<br />
-Teacher Name:{{tname}}<br />
-Exam Weight:{{ew}}%
-</p>
+<p style='width:100%;background-color:#DDDDDD;font-size:150%'>录入成绩[{{extra.course_info}}-{{extra.class_info}}]:</p>
+<table id='basicinfo'>
+<tr><th>班级：</th><td>{{extra.class_info}}</td>
+<th>课程：</th><td>{{extra.course_info}}</td>
+<th>任课教师：</th><td>{{extra.course_info.teacher}}</td>
+<th>考试比重：</th><td>{{extra.course_info.exam_weight}}%</td></tr>
+</table>
+<br />
 <form action="" method="post">
 {{formset.management_form}}
 <table>
-<tr><td>Student Number</td><td>Student Name</td><td>Exam Score</td><td>Non-exam Score</td></tr>
+<tr><th>学号</th><th>学生姓名</th><th>考试成绩</th><th>非考试成绩</th></tr>
 {% for rec in formset %}
 <tr>
 	<td>{{rec.instance.student.id}}{{rec.id}}</td>
@@ -22,6 +34,7 @@ Exam Weight:{{ew}}%
 </tr>
 {% endfor %}
 </table>
-<input type="submit" />
+<input type="submit" value="提交"/>
 </form>
 {% endblock %}  
+{% block footer %}{% endblock %} 

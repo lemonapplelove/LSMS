@@ -1,3 +1,4 @@
+#coding: utf-8
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg,Sum
@@ -43,9 +44,9 @@ class ClassManager(models.Model):
 
 class Class(models.Model):
     #ClassId=models.AutoField(primary_key=True)
-    class_name=models.CharField(max_length=50)
-    grade=models.IntegerField()
-    class_manager=models.ForeignKey(ClassManager)
+    class_name=models.CharField(max_length=50, verbose_name='班级名称')
+    grade=models.IntegerField(verbose_name='年级')
+    class_manager=models.ForeignKey(ClassManager, verbose_name='班级管理员')
     
     def __unicode__(self):
         return '%d %s' % (self.grade, self.class_name)
@@ -56,11 +57,11 @@ class Student(models.Model):
             ('F', 'Female')
     )
     #StudentId=models.AutoField(primary_key=True)
-    name=models.CharField(max_length=30, verbose_name='Student name')
-    birth=models.DateField(verbose_name='Birthday')
-    gender=models.CharField(max_length=1, choices=GENDER, default='M', verbose_name='Gender')
-    native=models.CharField(max_length=30, verbose_name='Student native')
-    class_obj=models.ForeignKey(Class, verbose_name='Class')
+    name=models.CharField(max_length=30, verbose_name='学生姓名')
+    birth=models.DateField(verbose_name='出生日期')
+    gender=models.CharField(max_length=1, choices=GENDER, default='M', verbose_name='性别')
+    native=models.CharField(max_length=30, verbose_name='学生籍贯')
+    class_obj=models.ForeignKey(Class, verbose_name='班级')
     user = models.ForeignKey(User, unique=True, null=True, blank=True, verbose_name='Student account')
     
     course_filter=None
@@ -88,18 +89,21 @@ class Student(models.Model):
         if self.course_filter is None:
             return self.courseonstudent_set.all()
         return self.courseonstudent_set.filter(**self.course_filter)
+    def notifications(self):
+        return self.class_obj.notification_set.all().order_by('-release_date', 'expire_date', '-id')
     def performances(self):
         return self.performance_set.all()
     def generate_performance(self, term, amr):
         aca=self.courseonstudent_set.filter(term=term, final_score__isnull=False).aggregate(Avg('final_score'))['final_score__avg']
-        mor=self.studentevent_set.filter(effect_term=term, event_type='R', point__lte=0).aggregate(Avg('point'))['point__avg']
+        mor=self.studentevent_set.filter(effect_term=term, event_type='R', point__gt=0).aggregate(Avg('point'))['point__avg']
         awd=self.studentevent_set.filter(effect_term=term, event_type='A').aggregate(Sum('point'))['point__sum']
         pns=self.studentevent_set.filter(effect_term=term, event_type='P').aggregate(Sum('point'))['point__sum']
         if aca is None: aca=0
         if mor is None: mor=0
         if awd is None: awd=0
         if pns is None: pns=0
-        fin=(aca*amr+mor*(100-amr))*1.0/100+awd-pns
+        aca, mor, awd, pns = aca*100, mor*100, awd*100, pns*100
+        fin=(aca*amr+mor*(100-amr))/100+awd-pns
         try:
             p=Performance.objects.get(student=self, term=term)
         except Performance.DoesNotExist:
@@ -122,12 +126,12 @@ class StudentEvent(models.Model):
            ('R', 'Record')
     )
     #EventId=models.AutoField(primary_key=True)
-    event_body=models.CharField(max_length=200, verbose_name='Event description')
-    event_type=models.CharField(max_length=1, choices=EVENT_TYPE, default='R', verbose_name='Event type')
-    point=models.IntegerField(default=0)
-    student=models.ForeignKey(Student)
-    event_date=models.DateField()
-    effect_term=models.IntegerField()
+    event_body=models.CharField(max_length=200, verbose_name='事件描述')
+    event_type=models.CharField(max_length=1, choices=EVENT_TYPE, default='R', verbose_name='事件类型')
+    point=models.IntegerField(default=0, verbose_name='事件得分')
+    student=models.ForeignKey(Student, verbose_name='学生')
+    event_date=models.DateField(verbose_name='事件日期')
+    effect_term=models.IntegerField(verbose_name='有效学期')
     
     def __unicode__(self):
         return self.event_body
@@ -204,11 +208,11 @@ class Performance(models.Model):
         return mark_safe(output)
     
 class Notification(models.Model):
-    notification_title=models.CharField(max_length=200)
-    notification_body=models.CharField(max_length=1000)
-    class_obj=models.ForeignKey(Class, verbose_name='Notification Class')
+    notification_title=models.CharField(max_length=200, verbose_name='通知标题')
+    notification_body=models.CharField(max_length=1000, verbose_name='通知内容')
+    class_obj=models.ForeignKey(Class, verbose_name='通知班级')
     release_date=models.DateField(default=date.today)
-    expire_date=models.DateField()
+    expire_date=models.DateField(verbose_name='截止日期')
     
 data_obj_map={'S':Student, 'T':Teacher, 'M':ClassManager}
     

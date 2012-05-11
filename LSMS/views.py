@@ -12,11 +12,16 @@ from django.contrib.auth.forms import *
 
 @login_required
 def home(request):
-    homepage={'S':'student_home.html', 'T':'teacher_home.html', 'M':'classmanager_home.html'}
     try:
-        return render_to_response(homepage[str(request.user.get_profile())], None, context_instance=RequestContext(request))
+        user_type=str(request.user.get_profile())
     except:
         return logout(request)
+    if user_type=='S':
+        return render_to_response('student_home.html', {'content':Student.objects.get(user=request.user)}, context_instance=RequestContext(request))
+    elif user_type=='T':
+        return HttpResponseRedirect('/course/')
+    elif user_type=='M':
+        return HttpResponseRedirect('/class/')
 
 def login(request):
     if request.method == 'POST':
@@ -28,7 +33,7 @@ def login(request):
         #if request.user.is_authenticated():
             #return HttpResponseRedirect(request.GET.get('next','/home'))
         form=AuthenticationForm()
-    return render_to_response('login.html', {'form':form})
+    return render_to_response('login.html', {'form':form}, context_instance=RequestContext(request))
 
 def logout(request):
     auth.logout(request)
@@ -42,7 +47,7 @@ def register(request):
             return HttpResponseRedirect('/accounts/login')
     else:
         form=RegisterForm()
-    return render_to_response('register.html', {'form': form})
+    return render_to_response('register.html', {'form': form}, context_instance=RequestContext(request))
 
 def modPass(request):
     pass
@@ -96,6 +101,7 @@ def addfor(request, *args, **kwargs):
 
     return render(request)
 
+@permission_required('SM.classmanager')
 def class_add(request):
     if request.method=='POST':
         form=ClassForm(data=request.POST,user=request.user)
@@ -104,58 +110,70 @@ def class_add(request):
             return HttpResponseRedirect('/class/')
     else:
         form=ClassForm(user=request.user)
-    return render_to_response('class_add.html', {'form': form})
+    return render_to_response('class_add.html', {'form': form}, context_instance=RequestContext(request))
 
+@permission_required('SM.classmanager')
 def class_list(request):
     q_set=Class.objects.filter(class_manager__user=request.user)
-    return render_to_response('class_list.html', {'content': q_set})
+    return render_to_response('class_list.html', {'content': q_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.classmanager')
 def student_add(request, cid):
     if request.method=='POST':
         form=StudentForm(data=request.POST, user=request.user, cid=cid)
         if form.is_valid():
             s=form.save()
-            return HttpResponseRedirect('/class/%s/student/' % s.class_obj.id)
+            #return HttpResponseRedirect('/class/%s/student/' % s.class_obj.id)
+            return HttpResponse('<script>window.opener.location.replace(window.opener.location.href);window.close();</script>')
     else:
         form=StudentForm(user=request.user, cid=cid)
-    return render_to_response('student_add.html', {'form': form})
+    return render_to_response('student_add.html', {'form': form}, context_instance=RequestContext(request))
 
+@permission_required('SM.classmanager')
 def student_list(request, cid):
     q_set=Student.objects.filter(class_obj=cid)
-    return render_to_response('student_list.html', {'content': q_set})
+    extra_set={'class': Class.objects.get(id=cid), 'classes':Class.objects.filter(class_manager__user=request.user)}
+    return render_to_response('student_list.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.student')
 def student_read(request, sid):
     q_set=Student.objects.get(id=sid)
-    return render_to_response('student_read.html', {'content': q_set})
+    return render_to_response('student_read.html', {'content': q_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.classmanager')
 def event_add(request, sid):
     if request.method=='POST':
         form=EventForm(data=request.POST, user=request.user, sid=sid)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/s/%s/roll/' % sid)
+            return HttpResponse('<script>window.opener.location.replace(window.opener.location.href);window.close();</script>')
     else:
         form=EventForm(user=request.user, sid=sid)
-    return render_to_response('event_add.html', {'form': form})
+    return render_to_response('event_add.html', {'form': form}, context_instance=RequestContext(request))
 
+@permission_required('SM.classmanager')
 def notification_add(request, cid):
     if request.method=='POST':
         form=NotificationForm(data=request.POST, user=request.user, cid=cid)
         if form.is_valid():
             n=form.save()
-            return HttpResponseRedirect('/class/%s/notification/' % n.class_obj.id)
+            return HttpResponse('<script>window.opener.location.replace(window.opener.location.href);window.close();</script>')
     else:
         form=NotificationForm(user=request.user, cid=cid)
-    return render_to_response('notification_add.html', {'form': form})
+    return render_to_response('notification_add.html', {'form': form}, context_instance=RequestContext(request))
 
+@permission_required('SM.student')
 def notification_list(request, cid):
-    q_set=Notification.objects.filter(class_obj=cid)
-    return render_to_response('notification_list.html', {'content': q_set})
+    q_set=Notification.objects.filter(class_obj=cid).order_by('-release_date', 'expire_date', '-id')
+    extra_set={'class': Class.objects.get(id=cid), 'classes':Class.objects.filter(class_manager__user=request.user)}
+    return render_to_response('notification_list.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.student')
 def notification_read(request, nid):
     q_set=Notification.objects.get(id=nid)
-    return render_to_response('notification_read.html', {'content': q_set})
+    return render_to_response('notification_read.html', {'content': q_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.teacher')
 def score_grade(request, course_id, class_id):
     if request.method=='POST':
         formset=GradeFormSet(data=request.POST)
@@ -168,33 +186,82 @@ def score_grade(request, course_id, class_id):
                 i.save()
             return HttpResponseRedirect('/course/%s/class/%s/' % (course_id, class_id))
     else:
+        extra_set={
+            'course_info': Course.objects.get(id=course_id),
+            'class_info': Class.objects.get(id=class_id),
+        }   
         formset=GradeFormSet(queryset=CourseOnStudent.objects.filter(course=course_id, student__class_obj=class_id))
-    return render_to_response('score_grade.html', {'formset': formset})
+    return render_to_response('score_grade.html', {'formset': formset, 'extra': extra_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.student')
 def score_read(request, sid):
     q_set=CourseOnStudent.objects.filter(student=sid)
-    return render_to_response('score_read.html', {'content': q_set})
+    extra_set=Student.objects.get(id=sid)
+    return render_to_response('score_read.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
-def score_list(requst, course_id, class_id):
+@permission_required('SM.teacher')
+def score_list(request, course_id, class_id):
     q_set=CourseOnStudent.objects.filter(course=course_id, student__class_obj=class_id)
     extra_set={
         'course_info': Course.objects.get(id=course_id),
         'class_info': Class.objects.get(id=class_id),
     }    
-    return render_to_response('score_list.html', {'content': q_set, 'extra': extra_set})
+    return render_to_response('score_list.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.teacher')
+def course_list(request, course_id=None):
+    q_set=Course.objects.filter(teacher__user=request.user)
+    extra_set=None
+    if course_id:
+        extra_set={
+            'classes': Class.objects.filter(id__in=CourseOnStudent.objects.filter(course__teacher__user=request.user, course=course_id).values_list('student__class_obj').distinct()),
+            'course_id':course_id, 
+        }
+    return render_to_response('course_list.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
+
+@permission_required('SM.classmanager')
 def performance_list(request, cid, term=None):
     cond={'student__class_obj': cid}
     if term: cond['term']=term
     q_set=Performance.objects.filter(**cond)
-    return render_to_response('performance_list.html', {'content': q_set})
+    extra_set={'class': Class.objects.get(id=cid), 'classes':Class.objects.filter(class_manager__user=request.user), 'selected_term':term}
+    return render_to_response('performance_list.html', {'content': q_set, 'extra': extra_set}, context_instance=RequestContext(request))
 
+@permission_required('SM.classmanager')
 def performance_generate(request, cid, term=None):
-    amr=request.GET.get('amr', 80)
+    amr=int(request.GET.get('amr', 80))
     for s in Student.objects.filter(class_obj=cid):
         s.generate_performance(term, amr)
     return HttpResponseRedirect('/class/%s/performance/term/%s/' % (cid, term))
 
+@permission_required('SM.classmanager')
+def remove(request, obj_id, obj_type):
+    obj_map={
+        'student':Student,
+        'event':StudentEvent,
+        'class':Class,
+        'notification': Notification,
+    }
+    
+    obj=obj_map[obj_type].objects.get(id=obj_id)
+    confirmed=request.GET.get('confirmed', False)
+    def check():
+        if obj_type=='class':
+            if obj.student_set.all().count() >0:
+                return '班级非空，删除失败！'
+        return True
+    msg=check()
+    if msg != True:
+        return HttpResponse('<script>alert(\'%s\');window.opener.location.replace(window.opener.location.href);window.close();</script>' % msg)
+    
+    if obj_type=='student':
+        Performance.objects.filter(student=obj).delete()
+        CourseOnStudent.objects.filter(student=obj).delete()
+        StudentEvent.objects.filter(student=obj).delete()
+        if obj.user: obj.user.delete()
+    obj.delete()
+    return HttpResponse('<script>alert(\'删除成功！\');window.opener.location.replace(window.opener.location.href);window.close();</script>')
+    
 
 
 
